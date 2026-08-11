@@ -1,0 +1,4 @@
+﻿interface:
+  display_name: "DramaClaw CE Docker Deploy"
+  short_description: "Deploy DramaClaw CE with Docker Compose"
+  default_prompt: "Use $dramaclaw-docker-deploy to build, publish, deploy, upgrade, and verify DramaClaw CE Docker Compose deployments."

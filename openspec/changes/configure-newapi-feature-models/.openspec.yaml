@@ -1,0 +1,3 @@
+schema: spec-driven
+created: 2026-07-26
+goal: Use one custom NewAPI source and explicit per-feature model bindings.

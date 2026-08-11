@@ -1,0 +1,74 @@
+﻿# DramaClaw CE 生产部署 - 官方 DC key 模式
+# 用法: docker compose -f docker-compose.prod.yml up -d --build
+# 对外端口: 6090 (前端 nginx，同时代理 /api 到后端)
+# 域名: drama.movstory.com
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dramaclaw
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: dramaclaw
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dramaclaw"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # 生产环境不对外暴露数据库端口
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # 需要 3DGS/SHARP/world 特性时: INSTALL_WORLD=1 docker compose -f docker-compose.prod.yml up --build
+      args:
+        INSTALL_WORLD: "${INSTALL_WORLD:-0}"
+    image: ${REGISTRY:-local}/dramaclaw:${DRAMACLAW_VERSION:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      DATABASE_URL: postgresql://dramaclaw:${DB_PASSWORD}@db:5432/dramaclaw
+      DB_ENCRYPTION_KEY: ${DB_ENCRYPTION_KEY}
+      ST_EDITION: ce
+      ST_CONTROL_PLANE_DSN: ""
+      ST_REDIS_URL: ""
+      ST_CELERY_BROKER_URL: ""
+      ST_CELERY_RESULT_BACKEND: ""
+      NOVELVIDEO_DATA_ROOT: /data
+      NOVELVIDEO_STATE_DIR: /data/state
+      DRAMACLAW_CHAT_BACKEND: hermes
+      HERMES_CLI_PATH: /root/.local/bin/hermes
+      NEWAPI_PROVISIONER_ENABLED: "true"
+      OFFICIAL_MODEL_SERVICE_URL:
+      ST_COOKIE_SECURE: "1"
+    volumes:
+      - ce-data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    # 生产环境不对外暴露 api 端口，全部走 web(nginx) 反代
+
+  # 前端 nginx，统一对外端口 6090，同时反代 /api 到 api 服务
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-local}/dramaclaw-frontend:${DRAMACLAW_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      BACKEND_HOST: api
+      BACKEND_PORT: "8780"
+    ports:
+      - "6090:80"
+    depends_on:
+      - api
+
+volumes:
+  ce-data:
+  db-data:

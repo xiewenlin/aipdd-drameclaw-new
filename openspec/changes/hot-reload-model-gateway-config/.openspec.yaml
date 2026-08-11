@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-26
+goal: Safely hot-reload global model gateway configuration for newly started
+  tasks while preserving in-flight task consistency.
