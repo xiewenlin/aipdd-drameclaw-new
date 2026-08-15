@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
@@ -15,6 +16,7 @@ from novelvideo.api.auth import (
 )
 from novelvideo.ports import get_auth_port
 from novelvideo.ports.auth_contract import AuthError, AuthFailureReason
+from novelvideo.gulong_sso import GulongSsoError, verify_gulong_sso_assertion
 from novelvideo.shared.runtime_env import cookie_secure as runtime_cookie_secure
 
 router = APIRouter()
@@ -27,6 +29,13 @@ def _cookie_secure() -> bool:
     return runtime_cookie_secure()
 
 
+def _require_local_auth_enabled() -> None:
+    if os.environ.get("SHORT_DRAMA_SSO_SECRET", "").strip() and os.environ.get(
+        "ALLOW_LOCAL_AUTH", ""
+    ).strip().lower() not in {"1", "true", "yes"}:
+        raise HTTPException(status_code=410, detail="请使用古龙统一账号登录或注册")
+
+
 def _set_auth_cookie(response: Response, cookie_value: str) -> None:
     response.set_cookie(
         key=AUTH_COOKIE_NAME,
@@ -37,6 +46,26 @@ def _set_auth_cookie(response: Response, cookie_value: str) -> None:
         max_age=_COOKIE_MAX_AGE_SECONDS,
         path="/",
     )
+
+
+def _set_embedded_auth_cookie(response: Response, cookie_value: str) -> None:
+    """Set a CHIPS cookie that remains usable inside the Gulong iframe."""
+
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=cookie_value,
+        httponly=True,
+        samesite="none",
+        secure=True,
+        max_age=_COOKIE_MAX_AGE_SECONDS,
+        path="/",
+    )
+    for index in range(len(response.raw_headers) - 1, -1, -1):
+        key, value = response.raw_headers[index]
+        if key.lower() == b"set-cookie" and value.startswith(f"{AUTH_COOKIE_NAME}=".encode()):
+            if b"Partitioned" not in value:
+                response.raw_headers[index] = (key, value + b"; Partitioned")
+            break
 
 
 def _clear_auth_cookie(response: Response) -> None:
@@ -60,8 +89,48 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=256)
 
 
+class GulongSsoExchangeRequest(BaseModel):
+    token: str = Field(min_length=64, max_length=4096)
+
+
+@router.post("/auth/gulong/exchange")
+async def exchange_gulong_sso(request: Request, body: GulongSsoExchangeRequest):
+    try:
+        identity = verify_gulong_sso_assertion(body.token)
+    except GulongSsoError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+    auth_port = get_auth_port()
+    exchange = getattr(auth_port, "exchange_gulong_identity", None)
+    if not callable(exchange):
+        raise HTTPException(status_code=503, detail="Gulong SSO requires the MongoDB backend")
+    try:
+        result = await exchange(
+            identity,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+        )
+    except AuthError as exc:
+        status = 403 if exc.reason == AuthFailureReason.USER_SUSPENDED else 401
+        raise HTTPException(status_code=status, detail=exc.detail or "SSO exchange failed") from exc
+
+    response = JSONResponse(
+        {
+            "ok": True,
+            "data": {
+                "user": result.user.to_legacy_dict(),
+                "session_id": result.session_id,
+            },
+        }
+    )
+    response.headers["Cache-Control"] = "no-store"
+    _set_embedded_auth_cookie(response, result.raw_cookie)
+    return response
+
+
 @router.post("/auth/register")
 async def register(request: Request, body: RegisterRequest):
+    _require_local_auth_enabled()
     auth_port = get_auth_port()
     try:
         result = await auth_port.register(
@@ -86,6 +155,7 @@ async def register(request: Request, body: RegisterRequest):
 
 @router.post("/auth/login")
 async def login(request: Request, body: LoginRequest):
+    _require_local_auth_enabled()
     auth_port = get_auth_port()
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")

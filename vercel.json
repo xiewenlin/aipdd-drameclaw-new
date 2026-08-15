@@ -4,7 +4,13 @@
     "frontend": {
       "root": "frontend/",
       "framework": "vite",
-      "buildCommand": "pnpm build:ce"
+      "buildCommand": "pnpm build:ce",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
+      ]
     },
     "backend": {
       "root": "./",

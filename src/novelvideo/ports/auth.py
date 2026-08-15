@@ -5,12 +5,21 @@ from __future__ import annotations
 from typing import Protocol
 
 from novelvideo.ports.auth_contract import AgentSessionToken
+from novelvideo.gulong_sso import GulongIdentity
 
 
 class AuthPort(Protocol):
     async def verify_session(self, raw_cookie: str | None) -> dict: ...
 
     async def revoke_session(self, raw_cookie: str) -> None: ...
+
+    async def exchange_gulong_identity(
+        self,
+        identity: GulongIdentity,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+    ): ...
 
 
 class AuthSessionPort(Protocol):

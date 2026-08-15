@@ -12,6 +12,7 @@ import base64
 import hashlib
 import hmac
 import os
+import re
 import secrets
 import tempfile
 from datetime import datetime, timedelta, timezone
@@ -35,6 +36,7 @@ from novelvideo.ports.auth_contract import (
 )
 from novelvideo.ports.project import Principal, ProjectRecord
 from novelvideo.ports.tasks import cancel_key
+from novelvideo.gulong_sso import GulongIdentity
 
 
 T = TypeVar("T")
@@ -95,6 +97,12 @@ def ensure_mongo_indexes() -> None:
             sparse=True,
             name="email_unique",
         )
+        db.users.create_index(
+            [("external_provider", ASCENDING), ("external_subject", ASCENDING)],
+            unique=True,
+            sparse=True,
+            name="external_identity_unique",
+        )
         db.user_sessions.create_index(
             [("session_token", ASCENDING)], unique=True, name="session_token_unique"
         )
@@ -135,6 +143,9 @@ def ensure_mongo_indexes() -> None:
         )
         db.task_cancellations.create_index(
             [("expires_at", ASCENDING)], expireAfterSeconds=0, name="cancel_expiry"
+        )
+        db.sso_redemptions.create_index(
+            [("expires_at", ASCENDING)], expireAfterSeconds=0, name="sso_redemption_expiry"
         )
         _INDEXES_READY = True
 
@@ -313,6 +324,109 @@ class MongoAuthPort:
                 upsert=True,
             )
             session = _new_session_document(str(user["_id"]))
+            db.user_sessions.insert_one(session)
+            return LoginResult(
+                user=_authenticated_user(user),
+                session_id=str(session["_id"]),
+                raw_cookie=str(session["session_token"]),
+            )
+
+        return await _run_sync(operation)
+
+    async def exchange_gulong_identity(
+        self,
+        identity: GulongIdentity,
+        *,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+    ) -> LoginResult:
+        """Link a signed Gulong identity to one local user and issue a browser session."""
+
+        def operation() -> LoginResult:
+            ensure_mongo_indexes()
+            db = get_mongo_database()
+            now = utc_now()
+            try:
+                db.sso_redemptions.insert_one(
+                    {
+                        "_id": identity.jti,
+                        "subject": identity.subject,
+                        "created_at": now,
+                        "expires_at": datetime.fromtimestamp(identity.expires_at, timezone.utc),
+                    }
+                )
+            except DuplicateKeyError as exc:
+                raise AuthError(AuthFailureReason.INVALID, "SSO assertion already used") from exc
+
+            external_filter = {
+                "external_provider": "gulong",
+                "external_subject": identity.subject,
+            }
+            user = db.users.find_one(external_filter)
+            normalized_email = identity.email.casefold() if identity.email else None
+            if user is None and normalized_email:
+                candidate = db.users.find_one({"email": normalized_email})
+                if candidate:
+                    provider = candidate.get("external_provider")
+                    subject = candidate.get("external_subject")
+                    if provider and (provider != "gulong" or subject != identity.subject):
+                        raise AuthError(AuthFailureReason.INVALID, "Email is linked to another identity")
+                    user = candidate
+
+            mapped_role = "admin" if identity.role == "admin" else "user"
+            if user is None:
+                preferred = re.sub(r"[^\w-]+", "-", (identity.username or "").strip(), flags=re.UNICODE)
+                preferred = preferred.strip("-_")[:48]
+                suffix = hashlib.sha256(identity.subject.encode("utf-8")).hexdigest()[:10]
+                username = preferred or f"gulong_{suffix}"
+                if db.users.find_one({"username": username}):
+                    username = f"{username[:48]}_{suffix}"
+                user = {
+                    "_id": str(ULID()),
+                    "username": username,
+                    "password_hash": "external:gulong",
+                    "role": mapped_role,
+                    "status": "active",
+                    "display_name": identity.display_name or identity.username or username,
+                    "external_provider": "gulong",
+                    "external_subject": identity.subject,
+                    "created_at": now,
+                    "updated_at": now,
+                    "last_login_at": now,
+                }
+                if normalized_email:
+                    user["email"] = normalized_email
+                try:
+                    db.users.insert_one(user)
+                except DuplicateKeyError as exc:
+                    raise AuthError(AuthFailureReason.INVALID, "Gulong identity could not be linked") from exc
+                db.user_model_configs.update_one(
+                    {"user_id": user["_id"]},
+                    {"$setOnInsert": _default_user_config(user["_id"], now)},
+                    upsert=True,
+                )
+            else:
+                if user.get("status") != "active":
+                    raise AuthError(AuthFailureReason.USER_SUSPENDED, "Account is not active")
+                updates: dict[str, Any] = {
+                    "external_provider": "gulong",
+                    "external_subject": identity.subject,
+                    "display_name": identity.display_name or user.get("display_name") or user["username"],
+                    "role": mapped_role,
+                    "updated_at": now,
+                    "last_login_at": now,
+                }
+                if normalized_email:
+                    updates["email"] = normalized_email
+                db.users.update_one({"_id": user["_id"]}, {"$set": updates})
+                user = {**user, **updates}
+
+            session = _new_session_document(
+                str(user["_id"]),
+                ip_address=ip_address,
+                user_agent=user_agent,
+                device_info="gulong-sso",
+            )
             db.user_sessions.insert_one(session)
             return LoginResult(
                 user=_authenticated_user(user),
