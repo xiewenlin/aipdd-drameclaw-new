@@ -10,6 +10,8 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronUp } from "lucide-react";
 import { LoginModal, type AuthModalMode } from "@/components/login/login-modal";
+import { WatchPlayer } from "@/components/login/watch-player";
+import { loginCommunityWorks } from "@/lib/login-community";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { LoginCinematicHero } from "./LoginCinematicHero";
 import { IntroRitualScreen } from "./IntroRitualScreen";
@@ -29,6 +31,8 @@ import layout from "./hero-layout.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const featuredWork = loginCommunityWorks[0];
+
 const clamp = (value: number, min = 0, max = 1) =>
   Math.min(max, Math.max(min, value));
 
@@ -42,6 +46,7 @@ export function LoginCinematicPage() {
   const heroReadyTimerRef = useRef<number | null>(null);
   const introFlowTimerRef = useRef<number | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [playerOpen, setPlayerOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthModalMode>("login");
   const [introComplete, setIntroComplete] = useState(false);
   const [introHeroReady, setIntroHeroReady] = useState(false);
@@ -51,6 +56,7 @@ export function LoginCinematicPage() {
   const reducedMotion = useReducedMotion();
   const heroReady = introHeroReady || reducedMotion;
   const flowReady = introFlowReady || reducedMotion;
+  const openPlayer = useCallback(() => setPlayerOpen(true), []);
 
   const scrollToTop = useCallback(() => {
     const lenis = lenisRef.current;
@@ -284,6 +290,7 @@ export function LoginCinematicPage() {
             isActive={secondVideoActive}
             videoExitProgress={secondVideoExitProgress}
             videoOpacity={videoOpacity}
+            onWatch={openPlayer}
           />
 
           <ThirdScreenVideo
@@ -292,6 +299,7 @@ export function LoginCinematicPage() {
             isActive={thirdVideoActive}
             videoExitProgress={thirdVideoExitProgress}
             videoOpacity={thirdVideoOpacity}
+            onWatch={openPlayer}
           />
 
           <FourthScreen
@@ -312,6 +320,7 @@ export function LoginCinematicPage() {
             exitProgress={sixthExitProgress}
             progress={sixthProgress}
             sequenceProgress={sixthSequenceProgress}
+            onWatch={openPlayer}
           />
 
           <SeventhPipelineScreen
@@ -331,6 +340,7 @@ export function LoginCinematicPage() {
             exitProgress={ninthExitProgress}
             progress={ninthProgress}
             sequenceProgress={ninthSequenceProgress}
+            onWatch={openPlayer}
           />
 
           <TenthTestimonialsScreen
@@ -372,6 +382,14 @@ export function LoginCinematicPage() {
       </button>
 
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} initialMode={authMode} />
+      {playerOpen ? (
+        <WatchPlayer
+          src={featuredWork.preview}
+          poster={featuredWork.cover}
+          title={featuredWork.title}
+          onClose={() => setPlayerOpen(false)}
+        />
+      ) : null}
     </main>
   );
 }

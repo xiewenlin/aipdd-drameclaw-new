@@ -103,6 +103,10 @@ export default defineConfig(({ mode }) => {
     // mostly app code; vendor bundles cache across deploys.
     build: {
       rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, "index.html"),
+          embed: path.resolve(__dirname, "embed.html"),
+        },
         output: {
           manualChunks(id) {
             if (!id.includes("node_modules")) return;

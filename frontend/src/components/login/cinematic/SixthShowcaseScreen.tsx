@@ -1,11 +1,16 @@
 import type { CSSProperties } from "react";
 import styles from "./sixth-showcase-screen.module.css";
 import { cinematicVideoLibrary } from "./media";
-import { COMMUNITY_WATCH_WORK } from "./watch-link";
 
 const works = cinematicVideoLibrary;
 
-function FilmShowcase({ sequenceProgress }: { sequenceProgress: number }) {
+function FilmShowcase({
+  sequenceProgress,
+  onWatch,
+}: {
+  sequenceProgress: number;
+  onWatch: () => void;
+}) {
   const translate = -sequenceProgress * 155;
 
   return (
@@ -25,15 +30,14 @@ function FilmShowcase({ sequenceProgress }: { sequenceProgress: number }) {
               <h3>{work.title}</h3>
               <p>{work.logline}</p>
             </div>
-            <a
+            <button
+              type="button"
               className={styles.watchButton}
-              href={`/watch/${COMMUNITY_WATCH_WORK}`}
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={onWatch}
               aria-label="立即观看社区作品"
             >
               <span>立即观看</span>
-            </a>
+            </button>
           </article>
         ))}
       </div>
@@ -45,10 +49,12 @@ export function SixthShowcaseScreen({
   exitProgress = 0,
   progress,
   sequenceProgress,
+  onWatch,
 }: {
   exitProgress?: number;
   progress: number;
   sequenceProgress: number;
+  onWatch: () => void;
 }) {
   if (exitProgress >= 0.99) return null;
   if (progress <= 0.01) return null;
@@ -68,7 +74,7 @@ export function SixthShowcaseScreen({
         <span>无限画布支持多参、多节点、多版本探索，并在确认后把结果写回主流程，保留自由创作空间</span>
       </div>
 
-      <FilmShowcase sequenceProgress={sequenceProgress} />
+      <FilmShowcase sequenceProgress={sequenceProgress} onWatch={onWatch} />
     </section>
   );
 }

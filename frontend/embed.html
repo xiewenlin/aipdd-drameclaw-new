@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08090c" />
+    <meta name="description" content="DramaClaw 短剧生产站" />
+    <link rel="icon" type="image/png" href="/brand/dclogo.png" />
+    <link rel="preconnect" href="https://nfg-web-assets.cdnfg.com" crossorigin />
+    <title>DramaClaw 短剧生产站</title>
+  </head>
+  <body>
+    <main class="embed-page">
+      <header class="embed-header">
+        <img src="/brand/dramaclaw-wordmark.png" alt="DramaClaw" width="128" height="34" />
+        <span id="account-status" class="account-status" aria-live="polite"></span>
+      </header>
+
+      <section class="hero" aria-labelledby="hero-title">
+        <img
+          class="hero-poster"
+          src="https://nfg-web-assets.cdnfg.com/dramaclaw/luban/luban-cover.png"
+          alt="《鲁班》短剧预览"
+          fetchpriority="high"
+        />
+        <div class="hero-scrim" aria-hidden="true"></div>
+        <div class="hero-copy">
+          <p class="eyebrow">AI SHORT DRAMA STUDIO</p>
+          <h1 id="hero-title">让灵感成为镜头</h1>
+          <p>从故事设定、角色资产到分镜与成片，在一条创作流程中持续推进。</p>
+          <div class="hero-actions">
+            <button id="start-create" class="primary-action" type="button">开始创作</button>
+            <button id="watch-now" class="secondary-action" type="button" aria-haspopup="dialog">
+              <span class="play-mark" aria-hidden="true">▶</span>
+              立即观看
+            </button>
+          </div>
+        </div>
+        <div class="work-meta" aria-label="当前预览作品">
+          <span>FEATURED FILM</span>
+          <strong>鲁班</strong>
+        </div>
+      </section>
+    </main>
+
+    <div id="watch-dialog" class="watch-dialog" role="dialog" aria-modal="true" aria-label="播放《鲁班》" hidden>
+      <button id="close-player" class="close-player" type="button" aria-label="关闭播放器">×</button>
+      <video
+        id="preview-player"
+        class="preview-player"
+        data-src="https://nfg-web-assets.cdnfg.com/dramaclaw/luban/luban-ep01.mp4"
+        poster="https://nfg-web-assets.cdnfg.com/dramaclaw/luban/luban-cover.png"
+        controls
+        playsinline
+        preload="none"
+      ></video>
+    </div>
+
+    <script type="module" src="/src/embed.ts"></script>
+  </body>
+</html>

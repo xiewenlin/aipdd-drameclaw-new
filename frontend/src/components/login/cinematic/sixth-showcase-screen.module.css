@@ -183,6 +183,8 @@
 }
 
 .watchButton {
+  appearance: none;
+  font-family: inherit;
   position: absolute;
   top: 50%;
   left: 50%;

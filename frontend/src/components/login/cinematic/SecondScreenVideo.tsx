@@ -7,12 +7,14 @@ export function SecondScreenVideo({
   isActive,
   videoExitProgress = 0,
   videoOpacity,
+  onWatch,
 }: {
   copyExitProgress?: number;
   copyProgress: number;
   isActive: boolean;
   videoExitProgress?: number;
   videoOpacity: number;
+  onWatch: () => void;
 }) {
   return (
     <ScrollVideoScene
@@ -26,6 +28,7 @@ export function SecondScreenVideo({
       videoExitProgress={videoExitProgress}
       videoOpacity={videoOpacity}
       videoUrl={cinematicVideos.pk}
+      onWatch={onWatch}
     />
   );
 }

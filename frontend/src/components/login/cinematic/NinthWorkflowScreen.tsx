@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 import DarkVeil from "@/components/react-bits/dark-veil";
 import styles from "./ninth-workflow-screen.module.css";
 import { cinematicVideos } from "./media";
-import { COMMUNITY_WATCH_WORK } from "./watch-link";
 
 const workflow = [
   {
@@ -38,10 +37,12 @@ export function NinthWorkflowScreen({
   progress,
   sequenceProgress,
   exitProgress = 0,
+  onWatch,
 }: {
   progress: number;
   sequenceProgress: number;
   exitProgress?: number;
+  onWatch: () => void;
 }) {
   if (exitProgress >= 0.99) return null;
 
@@ -106,15 +107,14 @@ export function NinthWorkflowScreen({
                     <div className={styles.previewTitle}>
                       <strong>鲁班秘术</strong>
                     </div>
-                    <a
+                    <button
+                      type="button"
                       className={styles.watchButton}
-                      href={`/watch/${COMMUNITY_WATCH_WORK}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      onClick={onWatch}
                       aria-label="立即观看社区作品"
                     >
                       <span>立即观看</span>
-                    </a>
+                    </button>
                   </div>
                 </div>
               ) : null}

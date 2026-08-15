@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import styles from "./scroll-video-scene.module.css";
-import { COMMUNITY_WATCH_WORK } from "./watch-link";
 
 export function ScrollVideoScene({
   align = "left",
@@ -15,6 +14,7 @@ export function ScrollVideoScene({
   videoExitProgress = 0,
   videoOpacity,
   videoUrl,
+  onWatch,
 }: {
   align?: "left" | "right";
   copyProgress: number;
@@ -27,6 +27,7 @@ export function ScrollVideoScene({
   videoExitProgress?: number;
   videoOpacity: number;
   videoUrl: string;
+  onWatch: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const wasActiveRef = useRef(false);
@@ -80,15 +81,14 @@ export function ScrollVideoScene({
         className={`${styles.scrim} ${align === "right" ? styles.scrimRight : ""}`}
         aria-hidden="true"
       />
-      <a
+      <button
+        type="button"
         className={styles.watchButton}
-        href={`/watch/${COMMUNITY_WATCH_WORK}`}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={onWatch}
         aria-label="立即观看社区作品"
       >
         <span>立即观看</span>
-      </a>
+      </button>
       <div className={`${styles.copy} ${align === "right" ? styles.copyRight : ""}`}>
         <p className={styles.kicker}>{kicker}</p>
         <h2 className={styles.title}>{title}</h2>
