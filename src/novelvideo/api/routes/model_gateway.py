@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from novelvideo import config as app_config
@@ -34,8 +34,9 @@ from novelvideo.model_catalog import (
 from novelvideo.model_gateway_settings import build_media_relay_status, save_media_relay_config
 from novelvideo.model_migration import apply_model_migration, build_model_migration_report
 from novelvideo.shared.runtime_env import is_ce_effective
+from novelvideo.api.auth import get_api_user
 
-router = APIRouter(prefix="/model-gateway")
+router = APIRouter(prefix="/model-gateway", dependencies=[Depends(get_api_user)])
 
 
 class MediaRelayConfigBody(BaseModel):

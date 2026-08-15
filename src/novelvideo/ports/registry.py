@@ -47,6 +47,7 @@ def ensure_bootstrap() -> None:
         return
     dsn = os.environ.get("ST_CONTROL_PLANE_DSN", "").strip()
     edition = os.environ.get("ST_EDITION", "").strip().lower()
+    mongodb_uri = os.environ.get("MONGODB_URI", "").strip()
     if dsn and edition == "ce":
         raise RuntimeError(
             "ST_CONTROL_PLANE_DSN 与 ST_EDITION=ce 同时设置(矛盾配置):"
@@ -62,6 +63,12 @@ def ensure_bootstrap() -> None:
                 + ", ".join(missing)
                 + "（入口点组 novelvideo.ports_bootstrap 未发现或注册不全）"
             )
+        _BOOTSTRAPPED = True
+        return
+    if mongodb_uri:
+        from novelvideo.ports.mongodb_bootstrap import register_mongodb_ports
+
+        register_mongodb_ports()
         _BOOTSTRAPPED = True
         return
     if edition == "ce":

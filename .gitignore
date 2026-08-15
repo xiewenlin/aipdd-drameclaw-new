@@ -8,7 +8,10 @@ htmlcov/
 .DS_Store
 .env
 .env1
+.env.local
 /.venv/
+/.venv-vercel-test/
+/.vercel/
 /.playwright-mcp
 /.nicegui
 /output

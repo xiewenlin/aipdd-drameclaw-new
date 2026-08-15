@@ -4,6 +4,8 @@ import logging
 import shutil
 import sqlite3
 import time
+import asyncio
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -476,6 +478,10 @@ async def create_project(
         except Exception:
             logger.warning("failed to cleanup uncommitted project directories", exc_info=True)
         raise
+    if os.environ.get("MONGODB_URI", "").strip():
+        from novelvideo.mongo_workspace import persist_workspace
+
+        await asyncio.to_thread(persist_workspace, record.id)
     return {"ok": True, "data": {"id": record.id, "project_id": record.id, "name": body.name}}
 
 

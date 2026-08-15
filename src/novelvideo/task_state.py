@@ -1480,5 +1480,10 @@ def get_task_manager() -> TaskStateManager:
     """
     global _task_manager
     if _task_manager is None:
-        _task_manager = TaskStateManager()
+        if os.environ.get("MONGODB_URI", "").strip():
+            from novelvideo.mongo_task_state import MongoTaskStateManager
+
+            _task_manager = MongoTaskStateManager()
+        else:
+            _task_manager = TaskStateManager()
     return _task_manager

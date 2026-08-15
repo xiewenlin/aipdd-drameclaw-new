@@ -133,6 +133,19 @@ def _connect() -> sqlite3.Connection:
 
 
 def _read_all() -> dict[str, str]:
+    if os.environ.get("MONGODB_URI", "").strip():
+        from novelvideo.ports.mongodb import get_mongo_database
+        from novelvideo.utils.crypto import decrypt_value
+
+        row = get_mongo_database().runtime_settings.find_one({"_id": "global"}) or {}
+        stored = row.get("values") or {}
+        result: dict[str, str] = {}
+        for key, value in stored.items():
+            text = str(value or "")
+            result[str(key)] = (
+                str(decrypt_value(text[4:]) or "") if text.startswith("enc:") else text
+            )
+        return result
     conn = _connect()
     try:
         rows = conn.execute("SELECT key, value FROM runtime_settings").fetchall()
@@ -148,6 +161,19 @@ def _uses_ce_gateway_settings() -> bool:
 
 def _write_many(values: dict[str, str]) -> None:
     now = _now_iso()
+    if os.environ.get("MONGODB_URI", "").strip():
+        from novelvideo.ports.mongodb import get_mongo_database
+        from novelvideo.utils.crypto import encrypt_value
+
+        updates = {
+            f"values.{key}": f"enc:{encrypt_value(str(value or ''))}"
+            for key, value in values.items()
+        }
+        updates["updated_at"] = now
+        get_mongo_database().runtime_settings.update_one(
+            {"_id": "global"}, {"$set": updates}, upsert=True
+        )
+        return
     conn = _connect()
     try:
         conn.execute("BEGIN IMMEDIATE")

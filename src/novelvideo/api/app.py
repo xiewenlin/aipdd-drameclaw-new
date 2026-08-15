@@ -6,6 +6,7 @@ import logging
 import os
 import threading
 import time
+import asyncio
 from collections import Counter
 from pathlib import Path
 
@@ -254,9 +255,75 @@ def create_app() -> FastAPI:
         )
         return response
 
+    if os.environ.get("MONGODB_URI", "").strip():
+        @application.middleware("http")
+        async def _serverless_project_workspace(request: Request, call_next):
+            from novelvideo.mongo_workspace import (
+                acquire_workspace_lease,
+                hydrate_workspace,
+                persist_workspace,
+                project_id_from_path,
+                release_workspace_lease,
+            )
+
+            project_id = project_id_from_path(request.url.path)
+            if not project_id:
+                return await call_next(request)
+
+            try:
+                lease_owner = await asyncio.to_thread(
+                    acquire_workspace_lease, project_id
+                )
+            except KeyError:
+                return await call_next(request)
+            except TimeoutError:
+                return JSONResponse(
+                    status_code=409,
+                    content={
+                        "ok": False,
+                        "error": "Project is busy; retry the request shortly",
+                    },
+                    headers={"Retry-After": "2"},
+                )
+
+            should_persist = (
+                request.method.upper() not in {"GET", "HEAD", "OPTIONS"}
+                and not request.url.path.endswith("/purge")
+            )
+            try:
+                await asyncio.to_thread(hydrate_workspace, project_id)
+                response = await call_next(request)
+                if should_persist:
+                    try:
+                        persisted = await asyncio.to_thread(
+                            persist_workspace, project_id, lease_owner
+                        )
+                        if not persisted:
+                            raise RuntimeError("Project workspace was not published")
+                    except Exception:
+                        logger.exception("Failed to persist project workspace: %s", project_id)
+                        return JSONResponse(
+                            status_code=503,
+                            content={
+                                "ok": False,
+                                "error": "Generation finished but project persistence failed; please retry",
+                            },
+                        )
+                return response
+            finally:
+                await asyncio.to_thread(
+                    release_workspace_lease, project_id, lease_owner
+                )
+
     @application.get("/healthz")
     async def healthz() -> dict[str, str]:
-        return {"status": "ok"}
+        if os.environ.get("MONGODB_URI", "").strip():
+            from novelvideo.ports.mongodb import get_mongo_client
+
+            await asyncio.to_thread(get_mongo_client().admin.command, "ping")
+        return {"status": "ok", "storage": "mongodb" if os.environ.get("MONGODB_URI", "").strip() else "local"}
+
+    application.add_api_route("/api/healthz", healthz, methods=["GET"], include_in_schema=False)
 
     @application.on_event("startup")
     async def startup() -> None:
