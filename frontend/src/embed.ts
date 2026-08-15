@@ -1,8 +1,11 @@
 import "./embed.css";
+import {
+  GULONG_ORIGIN,
+  isAllowedGulongOrigin,
+  resolveGulongParentOrigin,
+} from "./lib/gulong-origin";
 
-const GULONG_ORIGIN = (
-  import.meta.env.VITE_GULONG_ORIGIN || "https://sologle.com"
-).replace(/\/$/, "");
+const gulongParentOrigin = resolveGulongParentOrigin();
 
 const startButton = document.querySelector<HTMLButtonElement>("#start-create")!;
 const watchButton = document.querySelector<HTMLButtonElement>("#watch-now")!;
@@ -14,6 +17,18 @@ const accountStatus = document.querySelector<HTMLElement>("#account-status")!;
 let sessionReady = false;
 let enterAfterExchange = false;
 let exchangeInFlight: Promise<void> | null = null;
+let pendingFeedbackTimer: number | null = null;
+
+function setStartButton(label: string, busy = false): void {
+  startButton.textContent = label;
+  if (busy) startButton.setAttribute("aria-busy", "true");
+  else startButton.removeAttribute("aria-busy");
+}
+
+function postToGulong(message: Record<string, unknown>): void {
+  if (window.parent === window) return;
+  window.parent.postMessage(message, gulongParentOrigin);
+}
 
 function openPlayer(): void {
   if (!player.src) player.src = player.dataset.src || "";
@@ -31,16 +46,24 @@ function closePlayer(): void {
 }
 
 function enterStudio(): void {
+  if (window.parent === window) {
+    window.location.assign(`${GULONG_ORIGIN}/short-drama?auth=login`);
+    return;
+  }
   if (sessionReady) {
     window.location.assign("/");
     return;
   }
   enterAfterExchange = true;
   accountStatus.textContent = "等待账号授权…";
-  window.parent.postMessage(
-    { type: "dramaclaw:auth-request", mode: "login" },
-    GULONG_ORIGIN,
-  );
+  setStartButton("正在进入…", true);
+  postToGulong({ type: "dramaclaw:auth-request", mode: "login" });
+  window.clearTimeout(pendingFeedbackTimer ?? undefined);
+  pendingFeedbackTimer = window.setTimeout(() => {
+    if (sessionReady || exchangeInFlight) return;
+    setStartButton("重新尝试");
+    accountStatus.textContent = "请在古龙登录窗口完成登录";
+  }, 8000);
 }
 
 async function exchangeAssertion(token: string): Promise<void> {
@@ -59,16 +82,16 @@ async function exchangeAssertion(token: string): Promise<void> {
         throw new Error(body?.detail || "古龙账号授权失败");
       }
       sessionReady = true;
+      window.clearTimeout(pendingFeedbackTimer ?? undefined);
       accountStatus.textContent = "创作空间已就绪";
+      setStartButton(enterAfterExchange ? "正在进入…" : "进入创作空间", enterAfterExchange);
       if (enterAfterExchange) window.location.assign("/");
     } catch (error) {
       const message = error instanceof Error ? error.message : "古龙账号授权失败";
       accountStatus.textContent = "";
       enterAfterExchange = false;
-      window.parent.postMessage(
-        { type: "dramaclaw:sso-error", message },
-        GULONG_ORIGIN,
-      );
+      setStartButton("重新尝试");
+      postToGulong({ type: "dramaclaw:sso-error", message });
     } finally {
       exchangeInFlight = null;
     }
@@ -86,11 +109,11 @@ window.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !dialog.hidden) closePlayer();
 });
 window.addEventListener("message", (event) => {
-  if (event.origin !== GULONG_ORIGIN || event.source !== window.parent) return;
+  if (!isAllowedGulongOrigin(event.origin) || event.source !== window.parent) return;
   if (event.data?.type !== "gulong:sso" || typeof event.data.token !== "string") return;
   void exchangeAssertion(event.data.token);
 });
 
 if (window.parent !== window) {
-  window.parent.postMessage({ type: "dramaclaw:ready" }, GULONG_ORIGIN);
+  postToGulong({ type: "dramaclaw:ready" });
 }

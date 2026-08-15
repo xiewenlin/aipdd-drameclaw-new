@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/auth-store";
+import {
+  GULONG_ORIGIN,
+  isAllowedGulongOrigin,
+  resolveGulongParentOrigin,
+} from "@/lib/gulong-origin";
+
+export { GULONG_ORIGIN } from "@/lib/gulong-origin";
 
 export type GulongAuthMode = "login" | "register";
-
-const DEFAULT_GULONG_ORIGIN = "https://sologle.com";
-export const GULONG_ORIGIN = (
-  import.meta.env.VITE_GULONG_ORIGIN || DEFAULT_GULONG_ORIGIN
-).replace(/\/$/, "");
 
 export function isEmbeddedInGulong(): boolean {
   return typeof window !== "undefined" && window.parent !== window;
@@ -17,7 +19,7 @@ export function requestGulongAuth(mode: GulongAuthMode): void {
   if (isEmbeddedInGulong()) {
     window.parent.postMessage(
       { type: "dramaclaw:auth-request", mode },
-      GULONG_ORIGIN,
+      resolveGulongParentOrigin(),
     );
     return;
   }
@@ -30,9 +32,10 @@ export function useGulongSsoBridge(): void {
 
   useEffect(() => {
     if (!isEmbeddedInGulong()) return;
+    const parentOrigin = resolveGulongParentOrigin();
 
     const receiveAssertion = async (event: MessageEvent) => {
-      if (event.origin !== GULONG_ORIGIN || event.source !== window.parent) return;
+      if (!isAllowedGulongOrigin(event.origin) || event.source !== window.parent) return;
       if (event.data?.type !== "gulong:sso" || typeof event.data.token !== "string") return;
       if (exchanging.current) return;
       exchanging.current = true;
@@ -61,14 +64,14 @@ export function useGulongSsoBridge(): void {
         toast.error(message);
         window.parent.postMessage(
           { type: "dramaclaw:sso-error", message },
-          GULONG_ORIGIN,
+          parentOrigin,
         );
       }
     };
 
     window.addEventListener("message", receiveAssertion);
     if (window.location.pathname === "/login") {
-      window.parent.postMessage({ type: "dramaclaw:ready" }, GULONG_ORIGIN);
+      window.parent.postMessage({ type: "dramaclaw:ready" }, parentOrigin);
     }
     return () => window.removeEventListener("message", receiveAssertion);
   }, []);
