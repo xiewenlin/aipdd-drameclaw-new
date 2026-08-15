@@ -124,9 +124,11 @@ describe("runtime auth gating", () => {
 
   it("login beforeLoad keeps EE/auth-required runtime on login when unauthenticated", async () => {
     runtimeState.authRequired = true;
+    authState.getCurrentUser.mockResolvedValue(null);
     const { Route } = await import("@/routes/login");
 
     await expect(Route.options.beforeLoad?.({} as never)).resolves.toBeUndefined();
+    expect(authState.getCurrentUser).toHaveBeenCalledTimes(1);
   });
 
   it("_app missing-username mount guard validates CE/no-auth runtime instead of redirecting", async () => {
@@ -141,14 +143,15 @@ describe("runtime auth gating", () => {
     expect(navigateMock).not.toHaveBeenCalledWith({ to: "/login" });
   });
 
-  it("_app missing-username mount guard redirects EE/auth-required runtime", async () => {
+  it("_app missing-username mount guard validates an SSO cookie before redirecting", async () => {
     runtimeState.authRequired = true;
+    authState.validateSession.mockResolvedValue(true);
     const { Route } = await import("@/routes/_app");
     const Component = Route.options.component as ComponentType;
 
     render(createElement(Component));
 
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith({ to: "/login" }));
-    expect(authState.validateSession).not.toHaveBeenCalled();
+    await waitFor(() => expect(authState.validateSession).toHaveBeenCalledTimes(1));
+    expect(navigateMock).not.toHaveBeenCalledWith({ to: "/login" });
   });
 });

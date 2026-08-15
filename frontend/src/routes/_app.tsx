@@ -20,7 +20,6 @@ import { canonicalProjectRouteParam } from "@/lib/project-route";
 import { useRegionStore } from "@/stores/region-store";
 import { clusterConfig } from "@/lib/cluster-config";
 import { getRegionCookie } from "@/lib/region-cookie";
-import { authRequired } from "@/lib/runtime-config";
 import { initRegionTabSync } from "@/lib/region-tab-sync";
 import { initObservability } from "@/lib/observability";
 import { TaskCenterProvider } from "@/task-center/provider";
@@ -30,10 +29,6 @@ import { MyBuddyCompanion } from "@/features/companion/MyBuddyCompanion";
 import { AccessoryUnlockPrompt } from "@/features/rewards/AccessoryUnlockPrompt";
 import { VersionUpdateDialog } from "@/features/version-update/VersionUpdateDialog";
 import { PikoInspirationStation } from "@/features/piko-mini-game/PikoInspirationStation";
-
-export function shouldRedirectMissingUsernameToLogin(): boolean {
-  return authRequired();
-}
 
 function AppLayout() {
   const navigate = useNavigate();
@@ -98,12 +93,6 @@ function AppLayout() {
 
   useEffect(() => {
     if (!username) {
-      if (shouldRedirectMissingUsernameToLogin()) {
-        validatedUsernameRef.current = null;
-        setValidated(false);
-        navigate({ to: "/login" });
-        return;
-      }
       let cancelled = false;
       setValidated(false);
       validateSession().then((ok) => {

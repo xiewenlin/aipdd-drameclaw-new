@@ -28,8 +28,27 @@ describe("auth mode", () => {
   it("does not authenticate an empty auth-required runtime session", async () => {
     vi.stubEnv("VITE_AUTH_MODE", "cookie");
     runtimeState.authRequired = true;
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 401 })));
 
     expect(await ensureAuthenticatedForAppRoute()).toBe(false);
+  });
+
+  it("hydrates an auth-required session from the HttpOnly cookie", async () => {
+    vi.stubEnv("VITE_AUTH_MODE", "cookie");
+    runtimeState.authRequired = true;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          ok: true,
+          data: { username: "gulong-user", role: "user", credit_balance: 0 },
+        }),
+      })),
+    );
+
+    await expect(ensureAuthenticatedForAppRoute()).resolves.toBe(true);
+    expect(useAuthStore.getState().username).toBe("gulong-user");
   });
 
   it("uses /auth/me to establish a no-auth runtime session without showing login", async () => {
