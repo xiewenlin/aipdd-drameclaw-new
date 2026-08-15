@@ -4,8 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LoginCard } from "./login-card";
-import { RegisterCard } from "./register-card";
+import { GulongAuthCard } from "./gulong-auth-card";
 import styles from "./login.module.css";
 
 export type AuthModalMode = "login" | "register";
@@ -91,11 +90,10 @@ export function LoginModal({ open, onClose, initialMode = "login" }: LoginModalP
                 exit={{ opacity: 0, x: mode === "login" ? 12 : -12 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                {mode === "login" ? (
-                  <LoginCard onSwitchToRegister={() => setMode("register")} />
-                ) : (
-                  <RegisterCard onSwitchToLogin={() => setMode("login")} />
-                )}
+                <GulongAuthCard
+                  mode={mode}
+                  onSwitchMode={() => setMode(mode === "login" ? "register" : "login")}
+                />
               </motion.div>
             </AnimatePresence>
           </motion.div>

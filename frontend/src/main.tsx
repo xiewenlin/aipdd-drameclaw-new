@@ -19,6 +19,7 @@ import { installVersionUpdateWatch } from "@/lib/version-update-watch";
 import { installDomReconciliationGuard } from "@/lib/dom-reconciliation-guard";
 import { AppUpdateRequired } from "@/components/app-update-required";
 import { AppUpdateAvailable } from "@/components/app-update-available";
+import { useGulongSsoBridge } from "@/lib/gulong-sso";
 import { config as zodConfig } from "zod/v4/core";
 import "@fontsource-variable/inter";
 import "dramaclaw-spec-render/style.css";
@@ -81,6 +82,7 @@ installDomReconciliationGuard();
 
 function AppRouterShell() {
   const updateRequired = useChunkLoadRecoveryRequired();
+  useGulongSsoBridge();
   return (
     <>
       <RouterProvider router={router} />
