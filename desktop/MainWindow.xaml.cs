@@ -22,13 +22,14 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         TasksDataGrid.ItemsSource = _tasks;
-        Loaded += MainWindow_Loaded;
+        ContentRendered += MainWindow_ContentRendered;
         Closed += MainWindow_Closed;
         ShowView(DashboardView, DashboardNavButton);
     }
 
-    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    private async void MainWindow_ContentRendered(object? sender, EventArgs e)
     {
+        ContentRendered -= MainWindow_ContentRendered;
         _accountSession = new AccountSessionService(_api, this);
         _accountSession.ReturnedToWorkbench += async (_, _) => await RefreshAccountAsync();
         SetConnectionState("正在恢复古龙账号会话…", null);

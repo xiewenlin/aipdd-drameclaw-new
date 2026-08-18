@@ -2,12 +2,12 @@ Unicode True
 !include "MUI2.nsh"
 
 !define PRODUCT_NAME "古龙短剧"
-!define PRODUCT_VERSION "2.0.0"
+!define PRODUCT_VERSION "2.0.1"
 !define PRODUCT_PUBLISHER "古龙 Gulong Agent Engine"
-!define APP_EXE "Gulong-ShortDrama-Native-2.0.0-x64.exe"
+!define APP_EXE "Gulong-ShortDrama-Native-2.0.1-x64.exe"
 
 Name "${PRODUCT_NAME}"
-OutFile "release\Gulong-ShortDrama-Native-Setup-2.0.0-x64.exe"
+OutFile "release\Gulong-ShortDrama-Native-Setup-2.0.1-x64.exe"
 InstallDir "$LOCALAPPDATA\Programs\GulongShortDrama"
 InstallDirRegKey HKCU "Software\GulongShortDrama" "InstallDir"
 RequestExecutionLevel user

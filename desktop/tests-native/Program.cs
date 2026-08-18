@@ -2,6 +2,7 @@ using System.Text.Json;
 using Gulong.ShortDrama.Core;
 
 var failures = new List<string>();
+const int testCount = 7;
 
 Run("builds the exact Gulong H3 native task contract", () =>
 {
@@ -39,16 +40,29 @@ Run("uses unique native idempotency keys", () =>
 
 Run("desktop project is WPF-native and has no Electron dependency", () =>
 {
-    var directory = new DirectoryInfo(AppContext.BaseDirectory);
-    while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Gulong.ShortDrama.Desktop.csproj"))) directory = directory.Parent;
-    True(directory is not null);
-    var project = File.ReadAllText(Path.Combine(directory!.FullName, "Gulong.ShortDrama.Desktop.csproj"));
+    var directory = FindDesktopRoot();
+    var project = File.ReadAllText(Path.Combine(directory.FullName, "Gulong.ShortDrama.Desktop.csproj"));
     True(project.Contains("<UseWPF>true</UseWPF>", StringComparison.Ordinal));
     True(!project.Contains("Electron", StringComparison.OrdinalIgnoreCase));
 });
 
+Run("installer always compiles its Chinese script as UTF-8", () =>
+{
+    var buildScript = File.ReadAllText(Path.Combine(FindDesktopRoot().FullName, "build-native.ps1"));
+    True(buildScript.Contains("\"/INPUTCHARSET\" \"UTF8\"", StringComparison.Ordinal));
+});
+
+Run("native window uses the compatible render path before account initialization", () =>
+{
+    var directory = FindDesktopRoot();
+    var appSource = File.ReadAllText(Path.Combine(directory.FullName, "App.xaml.cs"));
+    var windowSource = File.ReadAllText(Path.Combine(directory.FullName, "MainWindow.xaml.cs"));
+    True(appSource.Contains("RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly", StringComparison.Ordinal));
+    True(windowSource.Contains("ContentRendered += MainWindow_ContentRendered", StringComparison.Ordinal));
+});
+
 Console.WriteLine();
-Console.WriteLine($"Tests: {5 - failures.Count} passed, {failures.Count} failed");
+Console.WriteLine($"Tests: {testCount - failures.Count} passed, {failures.Count} failed");
 if (failures.Count > 0)
 {
     foreach (var failure in failures) Console.Error.WriteLine(failure);
@@ -84,4 +98,11 @@ static void Throws<T>(Action action) where T : Exception
     try { action(); }
     catch (T) { return; }
     throw new InvalidOperationException($"Expected {typeof(T).Name}");
+}
+
+static DirectoryInfo FindDesktopRoot()
+{
+    var directory = new DirectoryInfo(AppContext.BaseDirectory);
+    while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Gulong.ShortDrama.Desktop.csproj"))) directory = directory.Parent;
+    return directory ?? throw new DirectoryNotFoundException("Desktop project root was not found");
 }
