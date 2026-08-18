@@ -45,9 +45,14 @@ deploy/compose/windows/users.json
 node_modules/
 /frontend/dist/
 /desktop/node_modules/
+/desktop/bin/
+/desktop/obj/
+/desktop/tests-native/bin/
+/desktop/tests-native/obj/
 /desktop/release/
 /desktop/*smoke*.png
 /.pnpm-store/
+/.tools/
 /docs/issues
 scripts/incident_drills/.drill.local.env
 .obsidian/

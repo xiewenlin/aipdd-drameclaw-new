@@ -1,25 +1,24 @@
-# 古龙短剧 Windows 桌面版
+# 古龙短剧 Windows 原生桌面版
 
-桌面端采用“线上 Vercel 全栈站 + Electron 安全桌面壳”架构。短剧功能继续由线上站点更新，Windows 客户端负责原生窗口、统一账号跳转、会员/充值入口和古龙官网视频任务网关，因此网页功能升级后无需重新开发整套桌面 UI。
+桌面端 2.0 使用 .NET 8 + WPF 原生控件实现。工作台、新建任务、我的任务、状态栏和全部导航均为 Windows 桌面组件，不加载短剧网站，也不依赖 Electron。
 
 ## 用户链路
 
-- 登录、注册：显示古龙官网的 `AccountModal`，成功后通过一次性 SSO assertion 换取短剧站 HttpOnly 会话。
-- 订阅：打开古龙官网 `/pricing`，沿用官网订单、微信支付与会员状态。
-- 充值：打开古龙官网 `/pricing#recharge`，沿用官网余额与支付记录。
-- 视频任务：桌面壳调用 `POST https://sologle.com/api/h3/tasks`，固定 `source_channel=desktop_agent` 与 `model=minimax_h3_shared`；官网负责鉴权、整数分核价、余额预扣、幂等和任务排队。
-- 任务列表：桌面壳调用 `GET https://sologle.com/api/h3/tasks`。
+- 登录、注册：只在独立的 WebView2 安全账号窗口中显示古龙官网表单，账号密码不会进入客户端代码。
+- 订阅、充值：只在独立的古龙安全窗口中显示官网支付流程，沿用官网订单与支付记录。
+- 账号状态：原生客户端通过登录会话读取 `/api/auth/me`、订阅和余额接口。
+- 视频任务：原生 `HttpClient` 调用 `POST https://sologle.com/api/h3/tasks`，固定 `source_channel=desktop_agent` 与 `model=minimax_h3_shared`；官网负责鉴权、整数分核价、余额预扣、幂等和排队。
+- 任务列表：原生控件展示 `GET https://sologle.com/api/h3/tasks` 的结果。
 
-桌面端不保存古龙账号密码、支付密钥或 SSO assertion。官网会话与短剧站会话分别存放在 Electron 的持久化隔离分区中。
+桌面端不保存古龙账号密码、支付密钥或一次性授权。官网 Cookie 由 WebView2 存放在当前 Windows 用户的本地应用数据目录中，并同步到进程内 CookieContainer；退出进程后内存副本即销毁。
 
 ## 本地运行和构建
 
+需要 .NET 8 SDK、WebView2 Runtime 和 NSIS。运行：
+
 ```powershell
 cd desktop
-npm install
-npm test
-npm run start
-npm run build:win
+.\build-native.ps1
 ```
 
-Windows 安装包与免安装版输出到 `desktop/release/`。
+Windows 安装包与单文件便携版输出到 `desktop/release/`。最终用户无需安装 .NET；Windows 10/11 通常已包含 WebView2 Runtime。

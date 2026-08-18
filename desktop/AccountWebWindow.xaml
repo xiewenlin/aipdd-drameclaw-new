@@ -1,0 +1,44 @@
+<Window x:Class="Gulong.ShortDrama.AccountWebWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="古龙账号"
+        Width="1120"
+        Height="800"
+        MinWidth="820"
+        MinHeight="620"
+        WindowStartupLocation="CenterOwner"
+        Icon="assets/icon.png">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="58" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="18,9">
+      <DockPanel LastChildFill="True">
+        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+          <Image Source="assets/icon.png" Width="36" Height="36" Margin="0,0,10,0" />
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock x:Name="WindowHeading" Text="古龙安全账号窗口" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="登录、注册和支付由古龙官网安全处理" FontSize="11" Foreground="{StaticResource TextSecondary}" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+          <Button x:Name="BackButton" Content="后退" Style="{StaticResource NativeButton}" Padding="12,6" Margin="0,0,8,0" Click="BackButton_Click" />
+          <Button Content="返回工作台" Style="{StaticResource NativeButton}" Padding="12,6" Click="CloseButton_Click" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <Grid Grid.Row="1">
+      <wv2:WebView2 x:Name="AccountBrowser" />
+      <Border x:Name="LoadingPanel" Background="#F7FAF9">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+          <ProgressBar Width="220" Height="5" IsIndeterminate="True" />
+          <TextBlock Text="正在连接古龙官网…" Margin="0,14,0,0" Foreground="{StaticResource TextSecondary}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>

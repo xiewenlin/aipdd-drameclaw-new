@@ -1,0 +1,231 @@
+<Window x:Class="Gulong.ShortDrama.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="古龙短剧"
+        Width="1380"
+        Height="880"
+        MinWidth="1080"
+        MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        Icon="assets/icon.png">
+  <Grid Background="{StaticResource AppBackground}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="72" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="32" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="18,10">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="22" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+          <Image Source="assets/icon.png" Width="44" Height="44" Margin="0,0,11,0" />
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="古龙短剧" FontSize="18" FontWeight="Bold" />
+            <TextBlock Text="Windows 原生工作台" FontSize="11" Foreground="{StaticResource TextSecondary}" />
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+          <Ellipse x:Name="ConnectionDot" Width="8" Height="8" Fill="#D39B2A" Margin="0,0,8,0" />
+          <TextBlock x:Name="HeaderStatusText" Text="正在连接古龙账号…" FontSize="12" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+          <Button x:Name="SubscriptionButton" Content="会员订阅" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="SubscriptionButton_Click" />
+          <Button x:Name="RechargeButton" Content="账户充值" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="RechargeButton_Click" />
+          <StackPanel x:Name="LoggedOutActions" Orientation="Horizontal">
+            <Button Content="注册" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="RegisterButton_Click" />
+            <Button Content="登录" Style="{StaticResource PrimaryButton}" Click="LoginButton_Click" />
+          </StackPanel>
+          <Button x:Name="AccountButton" Visibility="Collapsed" Style="{StaticResource NativeButton}" Click="AccountButton_Click">
+            <StackPanel Orientation="Horizontal">
+              <Border Width="30" Height="30" CornerRadius="8" Background="#E2F0EA" Margin="0,0,9,0">
+                <TextBlock x:Name="AccountInitial" Text="古" Foreground="{StaticResource Primary}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <StackPanel>
+                <TextBlock x:Name="AccountName" Text="古龙用户" FontSize="12" FontWeight="SemiBold" />
+                <TextBlock x:Name="AccountBalance" Text="¥0.00" FontSize="11" Foreground="{StaticResource Primary}" />
+              </StackPanel>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="226" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <Border Grid.Column="0" Background="#F9FBFA" BorderBrush="{StaticResource Border}" BorderThickness="0,0,1,0" Padding="14,22">
+        <DockPanel>
+          <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Padding="14" Margin="0,18,0,0">
+            <StackPanel>
+              <TextBlock Text="原生客户端 2.0" FontWeight="SemiBold" FontSize="12" />
+              <TextBlock Text="界面不加载短剧网页，任务直接提交到古龙官网。" TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" LineHeight="18" />
+            </StackPanel>
+          </Border>
+          <StackPanel>
+            <TextBlock Text="工作区" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="14,0,0,8" />
+            <Button x:Name="DashboardNavButton" Content="⌂   工作台" Style="{StaticResource NavButton}" Click="DashboardNavButton_Click" />
+            <Button x:Name="CreateNavButton" Content="＋  新建视频任务" Style="{StaticResource NavButton}" Click="CreateNavButton_Click" />
+            <Button x:Name="TasksNavButton" Content="☷   我的任务" Style="{StaticResource NavButton}" Click="TasksNavButton_Click" />
+            <Separator Margin="10,16" Background="{StaticResource Border}" />
+            <TextBlock Text="账号服务" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="14,0,0,8" />
+            <Button Content="♙   用户中心" Style="{StaticResource NavButton}" Click="AccountButton_Click" />
+            <Button Content="◇   会员订阅" Style="{StaticResource NavButton}" Click="SubscriptionButton_Click" />
+            <Button Content="¥   余额充值" Style="{StaticResource NavButton}" Click="RechargeButton_Click" />
+          </StackPanel>
+        </DockPanel>
+      </Border>
+
+      <Grid Grid.Column="1" Margin="28">
+        <ScrollViewer x:Name="DashboardView" VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="1080" HorizontalAlignment="Stretch">
+            <Border CornerRadius="18" Padding="34" Margin="0,0,0,22">
+              <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                  <GradientStop Color="#173F34" Offset="0" />
+                  <GradientStop Color="#1F7B5D" Offset="1" />
+                </LinearGradientBrush>
+              </Border.Background>
+              <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" MaxWidth="680" HorizontalAlignment="Left">
+                  <TextBlock Text="MINIMAX H3 SHARED" Foreground="#BFE3D4" FontSize="12" FontWeight="SemiBold" />
+                  <TextBlock Text="从创意到视频任务，一站完成" Foreground="White" FontSize="30" FontWeight="Bold" Margin="0,10,0,10" />
+                  <TextBlock Text="使用 Windows 原生控件编写提示词、设置画幅与时长。任务由古龙官网统一鉴权、计费和排队。" Foreground="#E4F3ED" FontSize="14" TextWrapping="Wrap" LineHeight="24" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="＋  开始创作" Style="{StaticResource PrimaryButton}" Background="White" Foreground="#175C47" BorderBrush="White" Padding="22,12" Margin="28,0,0,0" VerticalAlignment="Center" Click="CreateNavButton_Click" />
+              </Grid>
+            </Border>
+
+            <Grid Margin="0,0,0,22">
+              <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+              <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,12,0">
+                <StackPanel><TextBlock Text="账户余额" Foreground="{StaticResource TextSecondary}" /><TextBlock x:Name="DashboardBalance" Text="¥0.00" FontSize="26" FontWeight="Bold" Margin="0,8,0,0" /></StackPanel>
+              </Border>
+              <Border Grid.Column="1" Style="{StaticResource Card}" Margin="6,0">
+                <StackPanel><TextBlock Text="会员状态" Foreground="{StaticResource TextSecondary}" /><TextBlock x:Name="DashboardMembership" Text="未登录" FontSize="26" FontWeight="Bold" Margin="0,8,0,0" /></StackPanel>
+              </Border>
+              <Border Grid.Column="2" Style="{StaticResource Card}" Margin="12,0,0,0">
+                <StackPanel><TextBlock Text="视频模型" Foreground="{StaticResource TextSecondary}" /><TextBlock Text="MiniMax H3" FontSize="26" FontWeight="Bold" Margin="0,8,0,0" /></StackPanel>
+              </Border>
+            </Grid>
+
+            <TextBlock Text="快速操作" FontSize="18" FontWeight="SemiBold" Margin="2,0,0,12" />
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition /></Grid.ColumnDefinitions>
+              <Button Grid.Column="0" Style="{StaticResource NativeButton}" Padding="22" Margin="0,0,10,0" HorizontalContentAlignment="Stretch" Click="CreateNavButton_Click">
+                <StackPanel><TextBlock Text="新建视频任务" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Left" /><TextBlock Text="输入创意提示词，设置画幅和时长" Foreground="{StaticResource TextSecondary}" Margin="0,7,0,0" HorizontalAlignment="Left" /></StackPanel>
+              </Button>
+              <Button Grid.Column="1" Style="{StaticResource NativeButton}" Padding="22" Margin="10,0,0,0" HorizontalContentAlignment="Stretch" Click="TasksNavButton_Click">
+                <StackPanel><TextBlock Text="查看我的任务" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Left" /><TextBlock Text="检查排队、生成与完成状态" Foreground="{StaticResource TextSecondary}" Margin="0,7,0,0" HorizontalAlignment="Left" /></StackPanel>
+              </Button>
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer x:Name="CreateView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Text="新建视频任务" FontSize="28" FontWeight="Bold" />
+            <TextBlock Text="通过古龙官网接口创建视频生成任务" Foreground="{StaticResource TextSecondary}" Margin="0,7,0,22" />
+            <Border Style="{StaticResource Card}" Padding="28">
+              <StackPanel>
+                <TextBlock Text="创意提示词" FontWeight="SemiBold" />
+                <TextBlock Text="描述主体、场景、动作、镜头和风格，最多 20000 字。" Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,5,0,9" />
+                <TextBox x:Name="PromptTextBox" Height="190" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" SpellCheck.IsEnabled="False" />
+
+                <Grid Margin="0,22,0,0">
+                  <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="24" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                  <StackPanel Grid.Column="0">
+                    <TextBlock Text="画幅比例" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <ComboBox x:Name="AspectRatioComboBox" SelectedIndex="0">
+                      <ComboBoxItem Content="9:16  竖屏短剧" Tag="9:16" />
+                      <ComboBoxItem Content="16:9  横屏" Tag="16:9" />
+                      <ComboBoxItem Content="1:1  方形" Tag="1:1" />
+                      <ComboBoxItem Content="4:3  横向经典" Tag="4:3" />
+                      <ComboBoxItem Content="3:4  竖向经典" Tag="3:4" />
+                    </ComboBox>
+                  </StackPanel>
+                  <StackPanel Grid.Column="2">
+                    <TextBlock Text="视频时长（秒）" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <TextBox x:Name="DurationTextBox" Text="5" PreviewTextInput="DurationTextBox_PreviewTextInput" TextChanged="DurationTextBox_TextChanged" />
+                  </StackPanel>
+                </Grid>
+
+                <Border Background="#EDF5F2" CornerRadius="10" Padding="16" Margin="0,22,0,0">
+                  <DockPanel>
+                    <TextBlock Text="参考费用：官网最终核价并扣费" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
+                    <TextBlock x:Name="EstimatedPriceText" DockPanel.Dock="Right" Text="¥1.00" FontSize="18" FontWeight="Bold" Foreground="{StaticResource Primary}" />
+                  </DockPanel>
+                </Border>
+
+                <TextBlock x:Name="CreateErrorText" Visibility="Collapsed" Foreground="#B3261E" TextWrapping="Wrap" Margin="0,15,0,0" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                  <Button Content="返回工作台" Style="{StaticResource NativeButton}" Margin="0,0,10,0" Click="DashboardNavButton_Click" />
+                  <Button x:Name="SubmitTaskButton" Content="提交生成任务" Style="{StaticResource PrimaryButton}" Padding="22,10" Click="SubmitTaskButton_Click" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+
+        <Grid x:Name="TasksView" Visibility="Collapsed">
+          <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+          <Grid Grid.Row="0">
+            <StackPanel>
+              <TextBlock Text="我的视频任务" FontSize="28" FontWeight="Bold" />
+              <TextBlock Text="数据直接来自古龙官网任务接口" Foreground="{StaticResource TextSecondary}" Margin="0,7,0,0" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+              <Button Content="刷新" Style="{StaticResource NativeButton}" Margin="0,0,10,0" Click="RefreshTasksButton_Click" />
+              <Button Content="＋ 新建任务" Style="{StaticResource PrimaryButton}" Click="CreateNavButton_Click" />
+            </StackPanel>
+          </Grid>
+          <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0">
+            <Grid>
+              <DataGrid x:Name="TasksDataGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" BorderThickness="0" Background="White" RowHeight="54" ColumnHeaderHeight="44" AlternatingRowBackground="#F8FAF9">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="订单号" Binding="{Binding OrderNo}" Width="170" />
+                  <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="90" />
+                  <DataGridTextColumn Header="提示词" Binding="{Binding Prompt}" Width="*" />
+                  <DataGridTextColumn Header="画幅" Binding="{Binding AspectRatio}" Width="75" />
+                  <DataGridTextColumn Header="时长" Binding="{Binding DurationSeconds, StringFormat={}{0} 秒}" Width="75" />
+                  <DataGridTextColumn Header="费用" Binding="{Binding PriceText}" Width="85" />
+                  <DataGridTextColumn Header="创建时间" Binding="{Binding CreatedAtText}" Width="145" />
+                </DataGrid.Columns>
+              </DataGrid>
+              <StackPanel x:Name="TasksEmptyPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="还没有视频生成任务" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                <TextBlock Text="点击“新建任务”开始第一次创作" Foreground="{StaticResource TextSecondary}" Margin="0,7,0,0" />
+              </StackPanel>
+              <Border x:Name="TasksLoadingPanel" Background="#DDF9FBFA" Visibility="Collapsed">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <ProgressBar Width="220" Height="5" IsIndeterminate="True" />
+                  <TextBlock Text="正在读取视频任务…" Margin="0,12,0,0" Foreground="{StaticResource TextSecondary}" />
+                </StackPanel>
+              </Border>
+            </Grid>
+          </Border>
+        </Grid>
+      </Grid>
+    </Grid>
+
+    <Border Grid.Row="2" Background="#EAF0ED" BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Padding="14,5">
+      <DockPanel>
+        <TextBlock Text="古龙短剧原生客户端 · 安全连接 sologle.com" FontSize="11" Foreground="{StaticResource TextSecondary}" />
+        <TextBlock x:Name="FooterStatusText" DockPanel.Dock="Right" Text="就绪" FontSize="11" Foreground="{StaticResource TextSecondary}" />
+      </DockPanel>
+    </Border>
+  </Grid>
+</Window>
