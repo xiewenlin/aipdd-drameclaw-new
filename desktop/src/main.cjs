@@ -33,6 +33,7 @@ let contentView = null;
 let officialServiceWindow = null;
 const officialPageWindows = new Set();
 let authInFlight = null;
+let overlayVisible = false;
 
 let desktopState = {
   loading: true,
@@ -71,8 +72,19 @@ function publishState(patch = {}) {
 function resizeContentView() {
   if (!mainWindow || mainWindow.isDestroyed() || !contentView) return;
   const [width, height] = mainWindow.getContentSize();
+  if (overlayVisible) {
+    contentView.setAutoResize({ width: false, height: false });
+    contentView.setBounds({ x: 0, y: TOOLBAR_HEIGHT, width: 0, height: 0 });
+    return;
+  }
   contentView.setBounds({ x: 0, y: TOOLBAR_HEIGHT, width, height: Math.max(0, height - TOOLBAR_HEIGHT) });
   contentView.setAutoResize({ width: true, height: true });
+}
+
+function setOverlayVisible(visible) {
+  overlayVisible = Boolean(visible);
+  resizeContentView();
+  return { ok: true, visible: overlayVisible };
 }
 
 function waitForLoad(webContents) {
@@ -425,6 +437,7 @@ ipcMain.handle("desktop:refresh-account", async () => {
     return account ? { ok: true, account } : { ok: false, code: "AUTH_REQUIRED", message: "请先登录古龙账号" };
   } catch (error) { return serializeError(error); }
 });
+ipcMain.handle("desktop:set-overlay-visible", (_event, visible) => setOverlayVisible(visible));
 ipcMain.handle("desktop:navigate", (_event, action) => {
   if (!contentView || contentView.webContents.isDestroyed()) return { ok: false };
   if (action === "back" && contentView.webContents.canGoBack()) contentView.webContents.goBack();

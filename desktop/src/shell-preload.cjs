@@ -15,4 +15,5 @@ contextBridge.exposeInMainWorld("gulongShell", {
   listVideoTasks: () => ipcRenderer.invoke("desktop:list-video-tasks"),
   refreshAccount: () => ipcRenderer.invoke("desktop:refresh-account"),
   navigate: (action) => ipcRenderer.invoke("desktop:navigate", action),
+  setOverlayVisible: (visible) => ipcRenderer.invoke("desktop:set-overlay-visible", Boolean(visible)),
 });

@@ -1,6 +1,8 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
 const test = require("node:test");
 const {
   OFFICIAL_ORIGIN,
@@ -43,4 +45,17 @@ test("navigation is constrained to the short-drama app and trusted HTTPS destina
 test("unknown auth modes never escape the login flow", () => {
   assert.equal(normalizeAuthMode("register"), "register");
   assert.equal(normalizeAuthMode("admin"), "login");
+});
+
+test("desktop dialogs leave the toolbar outside their mask", () => {
+  const rendererSource = readFileSync(path.join(__dirname, "../renderer/app.js"), "utf8");
+  const styleSource = readFileSync(path.join(__dirname, "../renderer/styles.css"), "utf8");
+  const mainSource = readFileSync(path.join(__dirname, "../src/main.cjs"), "utf8");
+
+  assert.doesNotMatch(rendererSource, /showModal\(/);
+  assert.match(rendererSource, /dialog\.show\(\)/);
+  assert.match(rendererSource, /setOverlayVisible\(true\)/);
+  assert.match(styleSource, /\.desktop-toolbar\s*\{[^}]*z-index:\s*1000/s);
+  assert.match(styleSource, /\.dialog-shade\s*\{[^}]*inset:\s*68px 0 0/s);
+  assert.match(mainSource, /overlayVisible[\s\S]*width:\s*0,\s*height:\s*0/);
 });
