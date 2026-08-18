@@ -28,6 +28,7 @@ UninstallIcon "assets\icon.ico"
 
 Section "安装古龙短剧" SecMain
   SetOutPath "$INSTDIR"
+  Delete "$INSTDIR\Gulong-ShortDrama-Native-2.0.0-x64.exe"
   File "/oname=${APP_EXE}" "release\${APP_EXE}"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   WriteRegStr HKCU "Software\GulongShortDrama" "InstallDir" "$INSTDIR"
