@@ -44,6 +44,9 @@ deploy/compose/windows/users.json
 /scripts/output
 node_modules/
 /frontend/dist/
+/desktop/node_modules/
+/desktop/release/
+/desktop/*smoke*.png
 /.pnpm-store/
 /docs/issues
 scripts/incident_drills/.drill.local.env

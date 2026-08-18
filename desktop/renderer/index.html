@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>古龙短剧</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="desktop-toolbar">
+      <div class="brand">
+        <img src="../assets/icon.png" alt="" />
+        <div><strong>古龙短剧</strong><small>桌面创作工作台</small></div>
+      </div>
+      <nav class="history" aria-label="页面导航">
+        <button data-nav="back" type="button" title="后退" aria-label="后退">←</button>
+        <button data-nav="forward" type="button" title="前进" aria-label="前进">→</button>
+        <button data-nav="home" type="button">工作台</button>
+        <button data-nav="reload" type="button" title="刷新" aria-label="刷新">↻</button>
+      </nav>
+      <div class="status" aria-live="polite"><i></i><span id="status-text">正在连接…</span></div>
+      <div class="actions">
+        <button id="task-list" type="button">我的任务</button>
+        <button id="new-task" class="primary" type="button">＋ 新建视频任务</button>
+        <button id="subscription" type="button">订阅</button>
+        <button id="recharge" type="button">充值</button>
+        <button id="account" type="button">用户中心</button>
+        <div id="auth-actions" class="auth-actions">
+          <button id="register" type="button">注册</button>
+          <button id="login" class="primary" type="button">登录</button>
+        </div>
+        <button id="identity" class="identity" type="button" hidden><span id="identity-mark">古</span><b id="identity-name">古龙用户</b><em id="identity-balance">¥0.00</em></button>
+      </div>
+    </header>
+
+    <dialog id="task-dialog" class="dialog">
+      <form id="task-form">
+        <header><div><span>MINIMAX H3 SHARED</span><h2>创建视频生成任务</h2><p>任务由古龙官网计费并进入共享节点队列。</p></div><button class="close" type="button" data-close="task-dialog" aria-label="关闭">×</button></header>
+        <label><span>视频提示词</span><textarea id="task-prompt" required minlength="1" maxlength="20000" rows="7" placeholder="描述人物、场景、动作、镜头、光线和风格…"></textarea></label>
+        <div class="fields">
+          <label><span>时长（秒）</span><input id="task-duration" type="number" min="1" max="600" value="5" required /></label>
+          <label><span>画面比例</span><select id="task-ratio"><option value="9:16">9:16 竖屏短剧</option><option value="16:9">16:9 横屏</option><option value="1:1">1:1 方形</option><option value="4:3">4:3</option><option value="3:4">3:4</option></select></label>
+        </div>
+        <aside><b>预计费用</b><strong id="estimated-price">¥1.00</strong><small>按 0.20 元/秒计费；官网以整数分最终核价。</small></aside>
+        <div id="task-error" class="form-message error" hidden></div>
+        <footer><button type="button" data-close="task-dialog">取消</button><button id="submit-task" class="primary" type="submit">提交生成任务</button></footer>
+      </form>
+    </dialog>
+
+    <dialog id="result-dialog" class="dialog compact">
+      <section><header><div><span id="result-eyebrow">TASK CREATED</span><h2 id="result-title">任务已创建</h2></div><button class="close" type="button" data-close="result-dialog">×</button></header><div id="result-content"></div><footer><button type="button" data-close="result-dialog">关闭</button><button id="result-recharge" class="primary" type="button" hidden>前往充值</button></footer></section>
+    </dialog>
+
+    <dialog id="list-dialog" class="dialog wide">
+      <section><header><div><span>GULONG VIDEO TASKS</span><h2>我的视频任务</h2><p>查看由古龙官网创建的最近 50 个共享节点订单。</p></div><button class="close" type="button" data-close="list-dialog">×</button></header><div id="task-items" class="task-items"></div><footer><button type="button" data-close="list-dialog">关闭</button><button id="refresh-tasks" class="primary" type="button">刷新任务</button></footer></section>
+    </dialog>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
