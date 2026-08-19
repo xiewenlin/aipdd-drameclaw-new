@@ -91,5 +91,18 @@
       <Setter Property="BorderBrush" Value="#C9D5D0" />
       <Setter Property="FontSize" Value="14" />
     </Style>
+    <Style TargetType="DataGrid">
+      <Setter Property="Background" Value="White" />
+      <Setter Property="RowBackground" Value="White" />
+      <Setter Property="AlternatingRowBackground" Value="#F8FAF9" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="GridLinesVisibility" Value="Horizontal" />
+      <Setter Property="HorizontalGridLinesBrush" Value="#E5ECE9" />
+      <Setter Property="HeadersVisibility" Value="Column" />
+      <Setter Property="RowHeight" Value="46" />
+      <Setter Property="ColumnHeaderHeight" Value="38" />
+      <Setter Property="CanUserAddRows" Value="False" />
+      <Setter Property="CanUserDeleteRows" Value="False" />
+    </Style>
   </Application.Resources>
 </Application>

@@ -44,6 +44,25 @@ public sealed class AccountSessionService : IDisposable
         return await _api.ReadAccountAsync();
     }
 
+    public async Task<ApiResult<UserAccount>> EnsureProductionSessionAsync(DramaApiClient productionApi, AuthMode mode = AuthMode.Login)
+    {
+        var account = await EnsureAuthenticatedAsync(mode);
+        if (!account.IsSuccess || account.Value is null) return account;
+
+        var assertion = await _api.GetShortDramaSsoTokenAsync();
+        if (!assertion.IsSuccess || string.IsNullOrWhiteSpace(assertion.Value))
+        {
+            return ApiResult<UserAccount>.Failure(assertion.Code, assertion.Message);
+        }
+
+        var exchange = await productionApi.ExchangeGulongSessionAsync(assertion.Value);
+        if (!exchange.IsSuccess)
+        {
+            return ApiResult<UserAccount>.Failure(exchange.Code, exchange.Message);
+        }
+        return account;
+    }
+
     public async Task OpenAccountPageAsync()
     {
         await _window.ShowOfficialPageAsync("/account", "古龙用户中心");

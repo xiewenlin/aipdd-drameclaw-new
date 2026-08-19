@@ -14,9 +14,12 @@ public partial class MainWindow : Window
 {
     private static readonly Regex DigitsOnly = new("^[0-9]+$");
     private readonly OfficialApiClient _api = new();
+    private readonly DramaApiClient _dramaApi = new();
     private readonly ObservableCollection<VideoTask> _tasks = [];
     private AccountSessionService? _accountSession;
     private UserAccount? _account;
+    private ProductionWorkspace? _productionWorkspace;
+    private bool _productionInitialized;
 
     public MainWindow()
     {
@@ -49,6 +52,7 @@ public partial class MainWindow : Window
     private void MainWindow_Closed(object? sender, EventArgs e)
     {
         _accountSession?.Dispose();
+        _dramaApi.Dispose();
         _api.Dispose();
     }
 
@@ -57,9 +61,10 @@ public partial class MainWindow : Window
         DashboardView.Visibility = Visibility.Collapsed;
         CreateView.Visibility = Visibility.Collapsed;
         TasksView.Visibility = Visibility.Collapsed;
+        ProductionView.Visibility = Visibility.Collapsed;
         view.Visibility = Visibility.Visible;
 
-        foreach (var button in new[] { DashboardNavButton, CreateNavButton, TasksNavButton })
+        foreach (var button in new[] { DashboardNavButton, ProductionNavButton, CreateNavButton, TasksNavButton })
         {
             button.Background = button == activeButton ? new SolidColorBrush(Color.FromRgb(226, 240, 234)) : Brushes.Transparent;
             button.BorderBrush = button == activeButton ? new SolidColorBrush(Color.FromRgb(156, 185, 174)) : Brushes.Transparent;
@@ -146,6 +151,32 @@ public partial class MainWindow : Window
     }
 
     private void DashboardNavButton_Click(object sender, RoutedEventArgs e) => ShowView(DashboardView, DashboardNavButton);
+
+    private async void ProductionNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ShowView(ProductionView, ProductionNavButton);
+        _productionWorkspace ??= new ProductionWorkspace(_dramaApi, EnsureProductionAuthenticatedAsync);
+        ProductionView.Content = _productionWorkspace;
+        if (_productionInitialized) return;
+        _productionInitialized = true;
+        await _productionWorkspace.InitializeAsync();
+    }
+
+    private async Task<bool> EnsureProductionAuthenticatedAsync()
+    {
+        if (_accountSession is null) return false;
+        SetConnectionState("正在连接短剧生产空间…", null);
+        var result = await _accountSession.EnsureProductionSessionAsync(_dramaApi);
+        if (!result.IsSuccess || result.Value is null)
+        {
+            if (result.Code != "AUTH_CANCELLED") MessageBox.Show(this, result.Message, "短剧生产空间", MessageBoxButton.OK, MessageBoxImage.Warning);
+            SetConnectionState(result.Message, false);
+            return false;
+        }
+        ApplyAccount(result.Value);
+        SetConnectionState("短剧生产空间已连接", true);
+        return true;
+    }
 
     private void CreateNavButton_Click(object sender, RoutedEventArgs e)
     {

@@ -2,7 +2,7 @@ using System.Text.Json;
 using Gulong.ShortDrama.Core;
 
 var failures = new List<string>();
-const int testCount = 7;
+const int testCount = 10;
 
 Run("builds the exact Gulong H3 native task contract", () =>
 {
@@ -59,6 +59,32 @@ Run("native window uses the compatible render path before account initialization
     var windowSource = File.ReadAllText(Path.Combine(directory.FullName, "MainWindow.xaml.cs"));
     True(appSource.Contains("RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly", StringComparison.Ordinal));
     True(windowSource.Contains("ContentRendered += MainWindow_ContentRendered", StringComparison.Ordinal));
+});
+
+Run("native production workspace exposes the complete web workflow", () =>
+{
+    var directory = FindDesktopRoot();
+    var xaml = File.ReadAllText(Path.Combine(directory.FullName, "ProductionWorkspace.xaml"));
+    foreach (var stage in new[] { "项目管理", "文本导入", "视觉风格", "角色设定", "场景与道具", "分集规划", "剧本编辑", "节拍与分镜", "配音与音频", "视频生成", "合成与导出", "素材资产库", "自由画布", "AI 创作工具", "任务中心" })
+        True(xaml.Contains($"Content=\"{stage}\"", StringComparison.Ordinal));
+    True(!xaml.Contains("WebView2", StringComparison.OrdinalIgnoreCase));
+});
+
+Run("production API authenticates through Gulong SSO", () =>
+{
+    var directory = FindDesktopRoot();
+    var official = File.ReadAllText(Path.Combine(directory.FullName, "Services", "OfficialApiClient.cs"));
+    var production = File.ReadAllText(Path.Combine(directory.FullName, "Services", "DramaApiClient.cs"));
+    True(official.Contains("/api/auth/short-drama-sso", StringComparison.Ordinal));
+    True(production.Contains("/api/v1/auth/gulong/exchange", StringComparison.Ordinal));
+    True(production.Contains("CookieContainer", StringComparison.Ordinal));
+});
+
+Run("account window is re-centered and initialization is single-flight", () =>
+{
+    var source = File.ReadAllText(Path.Combine(FindDesktopRoot().FullName, "AccountWebWindow.xaml.cs"));
+    True(source.Contains("_initializationTask ??=", StringComparison.Ordinal));
+    True(source.Contains("PlaceOverOwner();", StringComparison.Ordinal));
 });
 
 Console.WriteLine();

@@ -70,13 +70,14 @@
         <DockPanel>
           <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Padding="14" Margin="0,18,0,0">
             <StackPanel>
-              <TextBlock Text="原生客户端 2.0" FontWeight="SemiBold" FontSize="12" />
-              <TextBlock Text="界面不加载短剧网页，任务直接提交到古龙官网。" TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" LineHeight="18" />
+              <TextBlock Text="原生客户端 3.0" FontWeight="SemiBold" FontSize="12" />
+              <TextBlock Text="完整制作链均由 Windows 原生组件实现，账号、计费与任务统一归属古龙官网。" TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" LineHeight="18" />
             </StackPanel>
           </Border>
           <StackPanel>
             <TextBlock Text="工作区" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="14,0,0,8" />
             <Button x:Name="DashboardNavButton" Content="⌂   工作台" Style="{StaticResource NavButton}" Click="DashboardNavButton_Click" />
+            <Button x:Name="ProductionNavButton" Content="▦   短剧全流程生产" Style="{StaticResource NavButton}" Click="ProductionNavButton_Click" />
             <Button x:Name="CreateNavButton" Content="＋  新建视频任务" Style="{StaticResource NavButton}" Click="CreateNavButton_Click" />
             <Button x:Name="TasksNavButton" Content="☷   我的任务" Style="{StaticResource NavButton}" Click="TasksNavButton_Click" />
             <Separator Margin="10,16" Background="{StaticResource Border}" />
@@ -218,6 +219,8 @@
             </Grid>
           </Border>
         </Grid>
+
+        <ContentControl x:Name="ProductionView" Visibility="Collapsed" Margin="-28" />
       </Grid>
     </Grid>
 

@@ -1,0 +1,228 @@
+<UserControl x:Class="Gulong.ShortDrama.ProductionWorkspace"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource AppBackground}">
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="66" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="18,10">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="320" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Margin="0,0,14,0">
+          <TextBlock Text="短剧生产工作台" FontSize="18" FontWeight="Bold" />
+          <TextBlock Text="原生全流程制作" FontSize="11" Foreground="{StaticResource TextSecondary}" />
+        </StackPanel>
+        <ComboBox x:Name="ProjectComboBox" Grid.Column="1" DisplayMemberPath="DisplayName" SelectedValuePath="Id" SelectionChanged="ProjectComboBox_SelectionChanged" />
+        <Button Grid.Column="2" Content="刷新项目" Style="{StaticResource NativeButton}" Margin="8,0,0,0" Click="RefreshProjectsButton_Click" />
+        <StackPanel Grid.Column="4" Orientation="Horizontal">
+          <TextBlock x:Name="ProductionStatusText" Text="请选择项目" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" Margin="0,0,14,0" />
+          <Button Content="新建项目" Style="{StaticResource PrimaryButton}" Click="NewProjectButton_Click" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="190" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <Border Grid.Column="0" Background="#F9FBFA" BorderBrush="{StaticResource Border}" BorderThickness="0,0,1,0" Padding="10,14">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <ListBox x:Name="StageList" SelectedIndex="0" SelectionChanged="StageList_SelectionChanged" BorderThickness="0" Background="Transparent">
+            <ListBox.Resources>
+              <Style TargetType="ListBoxItem">
+                <Setter Property="Padding" Value="13,10" />
+                <Setter Property="Margin" Value="0,2" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Style.Triggers>
+                  <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#E2F0EA" /><Setter Property="FontWeight" Value="SemiBold" /></Trigger>
+                </Style.Triggers>
+              </Style>
+            </ListBox.Resources>
+            <ListBoxItem Content="项目管理" />
+            <ListBoxItem Content="文本导入" />
+            <ListBoxItem Content="视觉风格" />
+            <ListBoxItem Content="角色设定" />
+            <ListBoxItem Content="场景与道具" />
+            <ListBoxItem Content="分集规划" />
+            <ListBoxItem Content="剧本编辑" />
+            <ListBoxItem Content="节拍与分镜" />
+            <ListBoxItem Content="配音与音频" />
+            <ListBoxItem Content="视频生成" />
+            <ListBoxItem Content="合成与导出" />
+            <ListBoxItem Content="素材资产库" />
+            <ListBoxItem Content="自由画布" />
+            <ListBoxItem Content="AI 创作工具" />
+            <ListBoxItem Content="任务中心" />
+          </ListBox>
+        </ScrollViewer>
+      </Border>
+
+      <TabControl x:Name="StudioTabs" Grid.Column="1" SelectedIndex="0" Background="Transparent" BorderThickness="0" Padding="22">
+        <TabControl.Template>
+          <ControlTemplate TargetType="TabControl">
+            <ContentPresenter Content="{TemplateBinding SelectedContent}" />
+          </ControlTemplate>
+        </TabControl.Template>
+
+        <TabItem>
+          <Grid>
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <Grid>
+              <StackPanel><TextBlock Text="项目管理" FontSize="27" FontWeight="Bold" /><TextBlock Text="创建、选择、归档与恢复短剧项目" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel>
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <TextBox x:Name="ProjectNameTextBox" Width="250" ToolTip="项目名称" />
+                <Button Content="创建" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="CreateProjectButton_Click" />
+              </StackPanel>
+            </Grid>
+            <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0">
+              <DataGrid x:Name="ProjectsGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionChanged="ProjectsGrid_SelectionChanged">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="项目" Binding="{Binding DisplayName}" Width="*" />
+                  <DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="90" />
+                  <DataGridTextColumn Header="分集" Binding="{Binding EpisodeCount}" Width="75" />
+                  <DataGridTextColumn Header="节拍" Binding="{Binding BeatCount}" Width="75" />
+                  <DataGridTextColumn Header="更新时间" Binding="{Binding UpdatedText}" Width="160" />
+                </DataGrid.Columns>
+              </DataGrid>
+            </Border>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,16,14">
+              <Button Content="归档" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="ArchiveProjectButton_Click" />
+              <Button Content="恢复" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="RestoreProjectButton_Click" />
+              <Button Content="移入回收站" Style="{StaticResource NativeButton}" Click="DeleteProjectButton_Click" />
+            </StackPanel>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid>
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <StackPanel><TextBlock Text="文本导入" FontSize="27" FontWeight="Bold" /><TextBlock Text="上传小说或剧本，解析章节并构建故事知识图谱" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel>
+            <Border Grid.Row="2" Style="{StaticResource Card}">
+              <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBox x:Name="IngestFileTextBox" IsReadOnly="True" ToolTip="选择 .txt、.md 或剧本文件" />
+                <Button Grid.Column="1" Content="选择文件" Style="{StaticResource NativeButton}" Margin="8,0,0,0" Click="ChooseIngestFileButton_Click" />
+                <Button Grid.Column="2" Content="上传并解析" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="UploadIngestButton_Click" />
+                <Button Grid.Column="3" Content="重建知识图谱" Style="{StaticResource NativeButton}" Margin="8,0,0,0" Click="RebuildGraphButton_Click" />
+              </Grid>
+            </Border>
+            <Border Grid.Row="4" Style="{StaticResource Card}" Padding="0">
+              <DataGrid x:Name="ChaptersGrid" AutoGenerateColumns="False" IsReadOnly="True">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="章节" Binding="{Binding Number}" Width="75" />
+                  <DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="240" />
+                  <DataGridTextColumn Header="正文预览" Binding="{Binding Preview}" Width="*" />
+                  <DataGridTextColumn Header="字数" Binding="{Binding CharacterCount}" Width="90" />
+                </DataGrid.Columns>
+              </DataGrid>
+            </Border>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid>
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <Grid><StackPanel><TextBlock Text="视觉风格" FontSize="27" FontWeight="Bold" /><TextBlock Text="创建风格、分析参考图并设为项目默认风格" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><Button Content="刷新" Style="{StaticResource NativeButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="RefreshStylesButton_Click" /></Grid>
+            <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="1.1*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+              <Border Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="StylesGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="StylesGrid_SelectionChanged"><DataGrid.Columns><DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="130" /><DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="180" /><DataGridTextColumn Header="说明" Binding="{Binding Description}" Width="*" /></DataGrid.Columns></DataGrid></Border>
+              <Border Grid.Column="2" Style="{StaticResource Card}"><StackPanel>
+                <TextBlock Text="风格配置" FontWeight="SemiBold" FontSize="16" />
+                <TextBlock Text="风格 ID" Margin="0,14,0,6" /><TextBox x:Name="StyleIdTextBox" />
+                <TextBlock Text="名称" Margin="0,12,0,6" /><TextBox x:Name="StyleNameTextBox" />
+                <TextBlock Text="提示词 / JSON 配置" Margin="0,12,0,6" /><TextBox x:Name="StyleConfigTextBox" Height="150" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
+                <WrapPanel Margin="0,16,0,0"><Button Content="创建风格" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8" Click="CreateStyleButton_Click" /><Button Content="设为默认" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="SetDefaultStyleButton_Click" /><Button Content="分析参考图" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="AnalyzeStyleButton_Click" /><Button Content="删除" Style="{StaticResource NativeButton}" Click="DeleteStyleButton_Click" /></WrapPanel>
+              </StackPanel></Border>
+            </Grid>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid>
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <Grid><StackPanel><TextBlock Text="角色设定" FontSize="27" FontWeight="Bold" /><TextBlock Text="管理角色、身份造型、声音和角色参考图" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><Button Content="从原文构建角色" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="BuildCharactersButton_Click" /></Grid>
+            <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="1.25*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+              <Border Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="CharactersGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="CharactersGrid_SelectionChanged"><DataGrid.Columns><DataGridTextColumn Header="角色" Binding="{Binding Name}" Width="150" /><DataGridTextColumn Header="定位" Binding="{Binding Role}" Width="100" /><DataGridTextColumn Header="性别" Binding="{Binding Gender}" Width="70" /><DataGridCheckBoxColumn Header="主角" Binding="{Binding IsMain}" Width="60" /><DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="*" /></DataGrid.Columns></DataGrid></Border>
+              <Border Grid.Column="2" Style="{StaticResource Card}"><ScrollViewer><StackPanel>
+                <TextBlock Text="角色资料" FontWeight="SemiBold" FontSize="16" />
+                <TextBlock Text="姓名" Margin="0,14,0,6" /><TextBox x:Name="CharacterNameTextBox" />
+                <Grid Margin="0,12,0,0"><Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="10" /><ColumnDefinition /></Grid.ColumnDefinitions><StackPanel><TextBlock Text="定位" Margin="0,0,0,6" /><TextBox x:Name="CharacterRoleTextBox" /></StackPanel><StackPanel Grid.Column="2"><TextBlock Text="性别" Margin="0,0,0,6" /><TextBox x:Name="CharacterGenderTextBox" /></StackPanel></Grid>
+                <CheckBox x:Name="CharacterMainCheckBox" Content="主要角色" Margin="0,12,0,0" />
+                <TextBlock Text="人物描述" Margin="0,12,0,6" /><TextBox x:Name="CharacterDescriptionTextBox" Height="90" AcceptsReturn="True" TextWrapping="Wrap" />
+                <TextBlock Text="面部提示词" Margin="0,12,0,6" /><TextBox x:Name="CharacterFacePromptTextBox" Height="70" AcceptsReturn="True" TextWrapping="Wrap" />
+                <WrapPanel Margin="0,16,0,0"><Button Content="新增" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8" Click="CreateCharacterButton_Click" /><Button Content="保存" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="UpdateCharacterButton_Click" /><Button Content="生成肖像" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="GeneratePortraitButton_Click" /><Button Content="上传肖像" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="UploadPortraitButton_Click" /><Button Content="删除" Style="{StaticResource NativeButton}" Click="DeleteCharacterButton_Click" /></WrapPanel>
+              </StackPanel></ScrollViewer></Border>
+            </Grid>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid>
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <StackPanel><TextBlock Text="场景与道具" FontSize="27" FontWeight="Bold" /><TextBlock Text="维护场景母版、全景背景、3D 舞台和关键道具" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel>
+            <TabControl Grid.Row="2">
+              <TabItem Header="场景"><Grid Margin="12"><Grid.ColumnDefinitions><ColumnDefinition Width="1.25*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><DataGrid x:Name="ScenesGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="ScenesGrid_SelectionChanged"><DataGrid.Columns><DataGridTextColumn Header="场景" Binding="{Binding Name}" Width="160" /><DataGridTextColumn Header="类型" Binding="{Binding Type}" Width="110" /><DataGridTextColumn Header="时段" Binding="{Binding TimeOfDay}" Width="90" /><DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="*" /></DataGrid.Columns></DataGrid><Border Grid.Column="2" Style="{StaticResource Card}"><StackPanel><TextBlock Text="场景资料" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="名称" Margin="0,14,0,6" /><TextBox x:Name="SceneNameTextBox" /><TextBlock Text="类型 / 时段" Margin="0,12,0,6" /><Grid><Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="8" /><ColumnDefinition /></Grid.ColumnDefinitions><TextBox x:Name="SceneTypeTextBox" /><TextBox x:Name="SceneTimeTextBox" Grid.Column="2" /></Grid><TextBlock Text="环境描述" Margin="0,12,0,6" /><TextBox x:Name="SceneDescriptionTextBox" Height="105" AcceptsReturn="True" TextWrapping="Wrap" /><WrapPanel Margin="0,16,0,0"><Button Content="新增" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8" Click="CreateSceneButton_Click" /><Button Content="生成母版" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="GenerateSceneMasterButton_Click" /><Button Content="上传母版" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="UploadSceneMasterButton_Click" /><Button Content="生成全景" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="GenerateScenePanoButton_Click" /><Button Content="删除" Style="{StaticResource NativeButton}" Click="DeleteSceneButton_Click" /></WrapPanel></StackPanel></Border></Grid></TabItem>
+              <TabItem Header="道具"><Grid Margin="12"><Grid.ColumnDefinitions><ColumnDefinition Width="1.25*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><DataGrid x:Name="PropsGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="PropsGrid_SelectionChanged"><DataGrid.Columns><DataGridTextColumn Header="道具" Binding="{Binding Name}" Width="170" /><DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="*" /><DataGridTextColumn Header="参考图" Binding="{Binding ReferenceUrl}" Width="180" /></DataGrid.Columns></DataGrid><Border Grid.Column="2" Style="{StaticResource Card}"><StackPanel><TextBlock Text="道具资料" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="名称" Margin="0,14,0,6" /><TextBox x:Name="PropNameTextBox" /><TextBlock Text="描述" Margin="0,12,0,6" /><TextBox x:Name="PropDescriptionTextBox" Height="110" AcceptsReturn="True" TextWrapping="Wrap" /><WrapPanel Margin="0,16,0,0"><Button Content="新增" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8" Click="CreatePropButton_Click" /><Button Content="生成参考图" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="GeneratePropButton_Click" /><Button Content="批量生成" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="BatchGeneratePropsButton_Click" /><Button Content="删除" Style="{StaticResource NativeButton}" Click="DeletePropButton_Click" /></WrapPanel></StackPanel></Border></Grid></TabItem>
+            </TabControl>
+          </Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><StackPanel><TextBlock Text="分集规划" FontSize="27" FontWeight="Bold" /><TextBlock Text="从故事主线生成分集并选择当前制作集" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><Border Grid.Row="2" Style="{StaticResource Card}"><StackPanel Orientation="Horizontal"><TextBlock Text="目标集数" VerticalAlignment="Center" /><TextBox x:Name="TargetEpisodesTextBox" Text="8" Width="80" Margin="10,0" /><ComboBox x:Name="PlanningModeComboBox" Width="150" SelectedIndex="0"><ComboBoxItem Content="标准规划" Tag="standard" /><ComboBoxItem Content="快速规划" Tag="fast" /><ComboBoxItem Content="详细规划" Tag="detailed" /></ComboBox><Button Content="生成分集" Style="{StaticResource PrimaryButton}" Margin="10,0,0,0" Click="BuildEpisodesButton_Click" /><Button Content="刷新" Style="{StaticResource NativeButton}" Margin="8,0,0,0" Click="RefreshEpisodesButton_Click" /></StackPanel></Border><Border Grid.Row="4" Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="EpisodesGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="EpisodesGrid_SelectionChanged"><DataGrid.Columns><DataGridTextColumn Header="集数" Binding="{Binding Number}" Width="80" /><DataGridTextColumn Header="标题" Binding="{Binding Title}" Width="260" /><DataGridTextColumn Header="梗概" Binding="{Binding Summary}" Width="*" /><DataGridTextColumn Header="状态" Binding="{Binding Status}" Width="100" /></DataGrid.Columns></DataGrid></Border></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /><RowDefinition Height="14" /><RowDefinition Height="Auto" /></Grid.RowDefinitions><Grid><StackPanel><TextBlock Text="剧本编辑" FontSize="27" FontWeight="Bold" /><TextBlock x:Name="ScriptEpisodeText" Text="请选择分集" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"><Button Content="读取剧本" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="LoadScriptButton_Click" /><Button Content="AI 生成剧本" Style="{StaticResource PrimaryButton}" Click="GenerateScriptButton_Click" /></StackPanel></Grid><TextBox x:Name="ScriptEditorTextBox" Grid.Row="2" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas, Microsoft YaHei UI" Padding="16" /><StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"><Button Content="格式化 JSON" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="FormatScriptButton_Click" /><Button Content="保存剧本" Style="{StaticResource PrimaryButton}" Click="SaveScriptButton_Click" /></StackPanel></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><Grid><StackPanel><TextBlock Text="节拍与分镜" FontSize="27" FontWeight="Bold" /><TextBlock Text="编辑镜头节拍、生成分镜图并维护镜头素材" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"><Button Content="读取节拍" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="LoadBeatsButton_Click" /><Button Content="生成全部分镜" Style="{StaticResource PrimaryButton}" Click="GenerateSketchesButton_Click" /></StackPanel></Grid><Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="1.3*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="BeatsGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="BeatsGrid_SelectionChanged"><DataGrid.Columns><DataGridTextColumn Header="镜头" Binding="{Binding Number}" Width="65" /><DataGridTextColumn Header="画面" Binding="{Binding Visual}" Width="*" /><DataGridTextColumn Header="旁白/对白" Binding="{Binding Narration}" Width="220" /><DataGridTextColumn Header="状态" Binding="{Binding AssetStatus}" Width="100" /></DataGrid.Columns></DataGrid></Border><Border Grid.Column="2" Style="{StaticResource Card}"><StackPanel><TextBlock Text="镜头详情" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="镜头号" Margin="0,14,0,6" /><TextBox x:Name="BeatNumberTextBox" /><TextBlock Text="画面描述" Margin="0,12,0,6" /><TextBox x:Name="BeatVisualTextBox" Height="95" AcceptsReturn="True" TextWrapping="Wrap" /><TextBlock Text="旁白 / 对白" Margin="0,12,0,6" /><TextBox x:Name="BeatNarrationTextBox" Height="75" AcceptsReturn="True" TextWrapping="Wrap" /><WrapPanel Margin="0,16,0,0"><Button Content="保存镜头" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8" Click="UpdateBeatButton_Click" /><Button Content="生成视频提示词" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="GenerateVideoPromptButton_Click" /><Button Content="上传分镜" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="UploadSketchButton_Click" /><Button Content="重新生成分镜" Style="{StaticResource NativeButton}" Click="RegenerateSketchButton_Click" /></WrapPanel></StackPanel></Border></Grid></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><Grid><StackPanel><TextBlock Text="配音与音频" FontSize="27" FontWeight="Bold" /><TextBlock Text="试听音色、生成整集配音或为单镜头上传音频" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><Button Content="刷新音色" Style="{StaticResource NativeButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="RefreshVoicesButton_Click" /></Grid><Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="16" /><ColumnDefinition Width="420" /></Grid.ColumnDefinitions><Border Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="VoicesGrid" AutoGenerateColumns="False" IsReadOnly="True"><DataGrid.Columns><DataGridTextColumn Header="音色 ID" Binding="{Binding Id}" Width="170" /><DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="190" /><DataGridTextColumn Header="语言" Binding="{Binding Language}" Width="100" /><DataGridTextColumn Header="说明" Binding="{Binding Description}" Width="*" /></DataGrid.Columns></DataGrid></Border><Border Grid.Column="2" Style="{StaticResource Card}"><StackPanel><TextBlock Text="音频生成" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="镜头号（留空生成整集）" Margin="0,16,0,6" /><TextBox x:Name="AudioBeatNumberTextBox" /><TextBlock Text="试听文本" Margin="0,12,0,6" /><TextBox x:Name="VoicePreviewTextBox" Text="江湖夜雨十年灯，古龙短剧现在开场。" Height="80" AcceptsReturn="True" TextWrapping="Wrap" /><WrapPanel Margin="0,16,0,0"><Button Content="生成整集音频" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8" Click="GenerateEpisodeAudioButton_Click" /><Button Content="上传镜头音频" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="UploadBeatAudioButton_Click" /><Button Content="试听音色" Style="{StaticResource NativeButton}" Click="PreviewVoiceButton_Click" /></WrapPanel></StackPanel></Border></Grid></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><Grid><StackPanel><TextBlock Text="视频生成" FontSize="27" FontWeight="Bold" /><TextBlock Text="按镜头生成视频、选择候选版本并管理视频池" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><Button Content="读取视频池" Style="{StaticResource NativeButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="LoadVideoPoolButton_Click" /></Grid><Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="1.3*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="420" /></Grid.ColumnDefinitions><Border Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="VideoPoolGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="VideoPoolGrid_SelectionChanged"><DataGrid.Columns><DataGridTextColumn Header="镜头" Binding="{Binding Beat}" Width="70" /><DataGridTextColumn Header="版本" Binding="{Binding Id}" Width="180" /><DataGridTextColumn Header="状态" Binding="{Binding Status}" Width="100" /><DataGridTextColumn Header="视频地址" Binding="{Binding Url}" Width="*" /></DataGrid.Columns></DataGrid></Border><Border Grid.Column="2" Style="{StaticResource Card}"><StackPanel><TextBlock Text="生成设置" FontSize="16" FontWeight="SemiBold" /><TextBlock Text="镜头号" Margin="0,16,0,6" /><TextBox x:Name="VideoBeatNumberTextBox" /><TextBlock Text="视频后端" Margin="0,12,0,6" /><ComboBox x:Name="VideoBackendComboBox" /><TextBlock Text="追加提示词（可选）" Margin="0,12,0,6" /><TextBox x:Name="VideoPromptTextBox" Height="100" AcceptsReturn="True" TextWrapping="Wrap" /><WrapPanel Margin="0,16,0,0"><Button Content="生成镜头视频" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8" Click="GenerateBeatVideoButton_Click" /><Button Content="设为采用版本" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="SelectVideoCandidateButton_Click" /><Button Content="上传视频" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="UploadBeatVideoButton_Click" /><Button Content="打开视频" Style="{StaticResource NativeButton}" Click="OpenVideoButton_Click" /></WrapPanel></StackPanel></Border></Grid></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="18" /><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><StackPanel><TextBlock Text="合成与导出" FontSize="27" FontWeight="Bold" /><TextBlock Text="规划渲染、执行合成并下载成片、字幕和工程包" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><WrapPanel Grid.Row="2"><Button Content="生成渲染计划" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="PlanRenderButton_Click" /><Button Content="执行渲染" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="ExecuteRenderButton_Click" /><Button Content="合成成片" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8" Click="ComposeVideoButton_Click" /><Button Content="刷新结果" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="LoadFinalButton_Click" /><Button Content="下载视频" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="DownloadVideoButton_Click" /><Button Content="下载字幕" Style="{StaticResource NativeButton}" Margin="0,0,8,8" Click="DownloadSrtButton_Click" /><Button Content="导出 ZIP" Style="{StaticResource NativeButton}" Click="DownloadZipButton_Click" /></WrapPanel><Border Grid.Row="4" Style="{StaticResource Card}"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="220" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Background="#173F34" CornerRadius="12" Padding="22"><StackPanel VerticalAlignment="Center"><TextBlock Text="FINAL OUTPUT" Foreground="#BFE3D4" FontSize="11" /><TextBlock x:Name="FinalStatusText" Text="尚未合成" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,10,0,0" /></StackPanel></Border><TextBox x:Name="FinalResultTextBox" Grid.Column="1" Margin="18,0,0,0" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas, Microsoft YaHei UI" /></Grid></Border></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><Grid><StackPanel><TextBlock Text="素材资产库" FontSize="27" FontWeight="Bold" /><TextBlock Text="集中浏览图片、视频、音频、角色、场景和导演控制资产" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"><TextBox x:Name="AssetFilterTextBox" Width="220" ToolTip="按名称筛选" TextChanged="AssetFilterTextBox_TextChanged" /><Button Content="刷新" Style="{StaticResource NativeButton}" Margin="8,0,0,0" Click="RefreshAssetsButton_Click" /><Button Content="打开" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Click="OpenAssetButton_Click" /></StackPanel></Grid><Border Grid.Row="2" Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="AssetsGrid" AutoGenerateColumns="False" IsReadOnly="True"><DataGrid.Columns><DataGridTextColumn Header="分类" Binding="{Binding Category}" Width="100" /><DataGridTextColumn Header="类型" Binding="{Binding Kind}" Width="130" /><DataGridTextColumn Header="名称" Binding="{Binding Label}" Width="240" /><DataGridTextColumn Header="媒体" Binding="{Binding MediaType}" Width="90" /><DataGridCheckBoxColumn Header="存在" Binding="{Binding Exists}" Width="60" /><DataGridTextColumn Header="地址" Binding="{Binding Url}" Width="*" /></DataGrid.Columns></DataGrid></Border></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><Grid><StackPanel><TextBlock Text="自由画布" FontSize="27" FontWeight="Bold" /><TextBlock Text="以原生节点列表和 JSON 编辑器管理创作画布、历史与预设" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"><Button Content="刷新" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="RefreshCanvasesButton_Click" /><Button Content="新建画布" Style="{StaticResource PrimaryButton}" Click="NewCanvasButton_Click" /></StackPanel></Grid><Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="290" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="CanvasesGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionChanged="CanvasesGrid_SelectionChanged"><DataGrid.Columns><DataGridTextColumn Header="画布" Binding="{Binding Name}" Width="*" /><DataGridTextColumn Header="更新时间" Binding="{Binding UpdatedText}" Width="130" /></DataGrid.Columns></DataGrid></Border><Border Grid.Column="2" Style="{StaticResource Card}"><Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="12" /><RowDefinition Height="*" /><RowDefinition Height="12" /><RowDefinition Height="Auto" /></Grid.RowDefinitions><Grid><Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="10" /><ColumnDefinition /></Grid.ColumnDefinitions><TextBox x:Name="CanvasIdTextBox" ToolTip="画布 ID" /><TextBox x:Name="CanvasNameTextBox" Grid.Column="2" ToolTip="画布名称" /></Grid><TextBox x:Name="CanvasJsonTextBox" Grid.Row="2" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" FontFamily="Consolas" Text="{}{&quot;viewport&quot;:{&quot;x&quot;:0,&quot;y&quot;:0,&quot;zoom&quot;:1},&quot;nodes&quot;:[],&quot;edges&quot;:[]}" /><WrapPanel Grid.Row="4" HorizontalAlignment="Right"><Button Content="读取" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="LoadCanvasButton_Click" /><Button Content="历史" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="CanvasHistoryButton_Click" /><Button Content="删除" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="DeleteCanvasButton_Click" /><Button Content="保存画布" Style="{StaticResource PrimaryButton}" Click="SaveCanvasButton_Click" /></WrapPanel></Grid></Border></Grid></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><StackPanel><TextBlock Text="AI 创作工具" FontSize="27" FontWeight="Bold" /><TextBlock Text="调用自由区技能完成文生图、图生图、反推提示词、翻译和故事脚本生成" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="340" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions><Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="技能" FontWeight="SemiBold" /><ComboBox x:Name="SkillComboBox" Margin="0,8,0,0" DisplayMemberPath="Name" SelectedValuePath="Id" /><TextBlock Text="提示词" Margin="0,14,0,6" /><TextBox x:Name="SkillPromptTextBox" Height="170" AcceptsReturn="True" TextWrapping="Wrap" /><TextBlock Text="参数 JSON（可选）" Margin="0,14,0,6" /><TextBox x:Name="SkillParametersTextBox" Height="110" AcceptsReturn="True" FontFamily="Consolas" Text="{}{}" /><Button Content="执行 AI 技能" Style="{StaticResource PrimaryButton}" Margin="0,18,0,0" Click="RunSkillButton_Click" /></StackPanel></Border><Border Grid.Column="2" Style="{StaticResource Card}"><Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="12" /><RowDefinition Height="*" /></Grid.RowDefinitions><TextBlock Text="执行结果" FontSize="16" FontWeight="SemiBold" /><TextBox x:Name="SkillResultTextBox" Grid.Row="2" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas, Microsoft YaHei UI" /></Grid></Border></Grid></Grid>
+        </TabItem>
+
+        <TabItem>
+          <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="16" /><RowDefinition Height="*" /></Grid.RowDefinitions><Grid><StackPanel><TextBlock Text="任务中心" FontSize="27" FontWeight="Bold" /><TextBlock Text="查看全流程异步任务、进度、日志与结果" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0" /></StackPanel><StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom"><Button Content="刷新" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="RefreshProductionTasksButton_Click" /><Button Content="取消 / 删除所选" Style="{StaticResource NativeButton}" Margin="0,0,8,0" Click="CancelProductionTaskButton_Click" /><Button Content="清理已完成" Style="{StaticResource PrimaryButton}" Click="ClearProductionTasksButton_Click" /></StackPanel></Grid><Border Grid.Row="2" Style="{StaticResource Card}" Padding="0"><DataGrid x:Name="ProductionTasksGrid" AutoGenerateColumns="False" IsReadOnly="True"><DataGrid.Columns><DataGridTextColumn Header="任务" Binding="{Binding Type}" Width="190" /><DataGridTextColumn Header="状态" Binding="{Binding StatusText}" Width="100" /><DataGridTextColumn Header="集/镜头" Binding="{Binding ScopeText}" Width="110" /><DataGridTextColumn Header="进度" Binding="{Binding ProgressText}" Width="90" /><DataGridTextColumn Header="当前步骤" Binding="{Binding CurrentTask}" Width="*" /><DataGridTextColumn Header="更新时间" Binding="{Binding UpdatedText}" Width="150" /></DataGrid.Columns></DataGrid></Border></Grid>
+        </TabItem>
+      </TabControl>
+    </Grid>
+
+    <Border x:Name="BusyOverlay" Grid.RowSpan="2" Background="#BFFFFFFF" Visibility="Collapsed">
+      <Border Style="{StaticResource Card}" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="30,22">
+        <StackPanel><ProgressBar Width="240" Height="5" IsIndeterminate="True" /><TextBlock x:Name="BusyText" Text="正在处理…" Margin="0,14,0,0" HorizontalAlignment="Center" /></StackPanel>
+      </Border>
+    </Border>
+  </Grid>
+</UserControl>

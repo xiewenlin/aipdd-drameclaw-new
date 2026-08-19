@@ -29,7 +29,7 @@ if ($LASTEXITCODE -ne 0) { throw "原生客户端测试失败" }
 if ($LASTEXITCODE -ne 0) { throw "原生客户端发布失败" }
 
 $publishedExe = Join-Path $publishRoot "Gulong.ShortDrama.exe"
-$portableExe = Join-Path $releaseRoot "Gulong-ShortDrama-Native-2.0.1-x64.exe"
+$portableExe = Join-Path $releaseRoot "Gulong-ShortDrama-Native-3.0.0-x64.exe"
 Copy-Item -LiteralPath $publishedExe -Destination $portableExe -Force
 
 $localNsis = Join-Path $repoRoot ".tools\nsis\makensis.exe"
@@ -48,5 +48,5 @@ finally {
     Pop-Location
 }
 
-Get-Item -LiteralPath $portableExe, (Join-Path $releaseRoot "Gulong-ShortDrama-Native-Setup-2.0.1-x64.exe") |
+Get-Item -LiteralPath $portableExe, (Join-Path $releaseRoot "Gulong-ShortDrama-Native-Setup-3.0.0-x64.exe") |
     Select-Object Name, Length, LastWriteTime

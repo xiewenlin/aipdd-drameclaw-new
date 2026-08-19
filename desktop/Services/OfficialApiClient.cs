@@ -28,7 +28,7 @@ public sealed class OfficialApiClient : IDisposable
             BaseAddress = new Uri(OfficialOrigin),
             Timeout = TimeSpan.FromSeconds(30),
         };
-        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Gulong-ShortDrama-Native/2.0 (Windows)");
+        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Gulong-ShortDrama-Native/3.0 (Windows)");
         _httpClient.DefaultRequestHeaders.Accept.ParseAdd("application/json");
     }
 
@@ -136,6 +136,32 @@ public sealed class OfficialApiClient : IDisposable
         catch (Exception error) when (error is HttpRequestException or TaskCanceledException or JsonException)
         {
             return ApiResult<IReadOnlyList<VideoTask>>.Failure("NETWORK_ERROR", error is TaskCanceledException ? "读取任务超时，请稍后重试" : $"读取任务失败：{error.Message}");
+        }
+    }
+
+    public async Task<ApiResult<string>> GetShortDramaSsoTokenAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await SendAsync(HttpMethod.Post, "/api/auth/short-drama-sso", new { }, null, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                return ApiResult<string>.Failure(ReadCode(response.Body, "SSO_ASSERTION_FAILED"), ReadMessage(response.Body, "无法获取古龙短剧授权"));
+            }
+
+            using var document = JsonDocument.Parse(response.Body);
+            var token = ReadString(document.RootElement, "token");
+            if (string.IsNullOrWhiteSpace(token) && TryGetObject(document.RootElement, "data", out var data))
+            {
+                token = ReadString(data, "token");
+            }
+            return string.IsNullOrWhiteSpace(token)
+                ? ApiResult<string>.Failure("SSO_ASSERTION_INVALID", "古龙官网未返回短剧授权令牌")
+                : ApiResult<string>.Success(token);
+        }
+        catch (Exception error) when (error is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            return ApiResult<string>.Failure("NETWORK_ERROR", error is TaskCanceledException ? "获取短剧授权超时" : $"获取短剧授权失败：{error.Message}");
         }
     }
 
